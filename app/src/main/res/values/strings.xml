@@ -5,4 +5,5 @@
     <string name="stop_recording">Stop Recording</string>
     <string name="recording">Recording</string>
     <string name="accessibility_service_label"> Auto AccessibilityService </string>
+    <string name="create_floating_widget">Create Floating Widget</string>
 </resources>

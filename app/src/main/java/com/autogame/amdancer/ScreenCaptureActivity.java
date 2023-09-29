@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ServiceInfo;
+import android.media.projection.MediaProjectionManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -19,15 +21,14 @@ import java.util.List;
 
 public class ScreenCaptureActivity extends Activity {
     private static final int REQUEST_CODE = 100;
+    private static final int SYSTEM_ALERT_WINDOW_PERMISSION = 2084;
+
     private static final String TAG = "ScreenCaptureActivity";
 
     // Used to load the 'amdancer' library on application startup.
     static {
         System.loadLibrary("amdancer");
     }
-
-    AutoAccessibilityService auto_accessibility_service = new AutoAccessibilityService();
-
 
     /****************************************** Activity Lifecycle methods ************************/
     @Override
@@ -42,7 +43,6 @@ public class ScreenCaptureActivity extends Activity {
             @Override
             public void onClick(View v) {
                 startProjection();
-//                test_click();
             }
         });
 
@@ -55,6 +55,21 @@ public class ScreenCaptureActivity extends Activity {
                 stopProjection();
             }
         });
+
+        Button showWidget = findViewById(R.id.buttonCreateWidget);
+        showWidget.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (Settings.canDrawOverlays(ScreenCaptureActivity.this)) {
+                    startService(new Intent(ScreenCaptureActivity.this, FloatingViewService.class));
+                    finish();
+                } else {
+                    askPermission();
+                    Log.e(TAG, "You need System Alert Window Permission to do this");
+                }
+            }
+        });
+
         File externalFilesDir = getExternalFilesDir(null);
         if (externalFilesDir != null) {
             String configDir = externalFilesDir.getAbsolutePath() + "/configs/";
@@ -79,7 +94,17 @@ public class ScreenCaptureActivity extends Activity {
         }
         if (!isAccessibilityServiceEnabled())
             requestAccessibilityService();
+
+        if (!Settings.canDrawOverlays(this)) {
+            askPermission();
+        }
         Log.e(TAG, "request result: " + isAccessibilityServiceEnabled());
+    }
+
+    private void askPermission() {
+        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:" + getPackageName()));
+        startActivityForResult(intent, SYSTEM_ALERT_WINDOW_PERMISSION);
     }
 
 
@@ -107,6 +132,7 @@ public class ScreenCaptureActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE) {
+            Log.e(TAG, "onActivityResult: " + resultCode);
             if (resultCode == Activity.RESULT_OK) {
                 startService(com.autogame.amdancer.ScreenCaptureService.getStartIntent(this, resultCode, data));
             }
@@ -115,10 +141,10 @@ public class ScreenCaptureActivity extends Activity {
 
     /****************************************** UI Widget Callbacks *******************************/
     private void startProjection() {
-        auto_accessibility_service.click(500, 500);
-//        MediaProjectionManager mProjectionManager =
-//                (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-//        startActivityForResult(mProjectionManager.createScreenCaptureIntent(), REQUEST_CODE);
+        Log.e(TAG, "startProjection");
+        MediaProjectionManager mProjectionManager =
+                (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+        startActivityForResult(mProjectionManager.createScreenCaptureIntent(), REQUEST_CODE);
     }
 
     private void stopProjection() {

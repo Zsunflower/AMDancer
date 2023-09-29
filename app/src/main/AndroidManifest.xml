@@ -5,6 +5,7 @@
     android:versionName="1.0">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application
         android:allowBackup="true"
@@ -26,7 +27,10 @@
         <service
             android:name=".ScreenCaptureService"
             android:foregroundServiceType="mediaProjection" />
-
+        <service
+            android:name=".FloatingViewService"
+            android:enabled="true"
+            android:exported="false" />
         <service
             android:name=".AutoAccessibilityService"
             android:foregroundServiceType="mediaProjection"

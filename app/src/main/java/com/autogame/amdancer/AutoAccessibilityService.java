@@ -7,22 +7,29 @@ import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 
 public class AutoAccessibilityService extends AccessibilityService {
+    private static final String TAG = "ScreenCaptureActivity";
+    private static AutoAccessibilityService mInstance = null;
+
+    public static AutoAccessibilityService getInstance() {
+        return mInstance;
+    }
+
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         // Your accessibility event handling logic goes here.
-        Log.e("AS", "onAccessibilityEvent: " + event.toString());
     }
 
     @Override
     public void onInterrupt() {
         // Handle interrupt, if necessary.
-        Log.e("AS", "onInterrupt");
+        Log.e(TAG, "onInterrupt");
     }
 
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
-        Log.d("AS", "onServiceConnected");
+        mInstance = this;
+        Log.d(TAG, "onServiceConnected");
     }
 
     public void click(int x, int y) {
@@ -30,15 +37,12 @@ public class AutoAccessibilityService extends AccessibilityService {
         path.moveTo(x, y);
 
         GestureDescription.Builder builder = new GestureDescription.Builder();
-        builder.addStroke(new GestureDescription.StrokeDescription(path, 0, 100));
+        builder.addStroke(new GestureDescription.StrokeDescription(path, 0, 10));
 
         GestureDescription gestureDescription = builder.build();
 
         // Call dispatchGesture here
-        if (dispatchGesture(gestureDescription, null, null))
-            Log.e("AS", "Click success");
-        else
-            Log.e("AS", "Click failed");
+        dispatchGesture(gestureDescription, null, null);
     }
 
     public void hold(int x, int y) {
@@ -46,11 +50,10 @@ public class AutoAccessibilityService extends AccessibilityService {
         path.moveTo(x, y);
 
         GestureDescription.Builder builder = new GestureDescription.Builder();
-        builder.addStroke(new GestureDescription.StrokeDescription(path, 0, 200));
+        builder.addStroke(new GestureDescription.StrokeDescription(path, 0, 500));
 
         GestureDescription gestureDescription = builder.build();
-        if (dispatchGesture(gestureDescription, null, null))
-            Log.e("AS", "Hold success");
+        dispatchGesture(gestureDescription, null, null);
     }
 
     // Perform a swipe gesture from (x1, y1) to (x2, y2)
@@ -60,11 +63,10 @@ public class AutoAccessibilityService extends AccessibilityService {
         path.lineTo(x2, y2);
 
         GestureDescription.Builder gestureBuilder = new GestureDescription.Builder();
-        gestureBuilder.addStroke(new GestureDescription.StrokeDescription(path, 0, 20)); // Adjust duration as needed
+        gestureBuilder.addStroke(new GestureDescription.StrokeDescription(path, 0, 400)); // Adjust duration as needed
         GestureDescription gestureDescription = gestureBuilder.build();
         // Dispatch the swipe gesture asynchronously
-        if (dispatchGesture(gestureDescription, null, null))
-            Log.e("AS", "Drag success");
+        dispatchGesture(gestureDescription, null, null);
     }
 }
 

@@ -17,4 +17,9 @@
         android:layout_height="wrap_content"
         android:text="@string/stop_recording" />
 
+    <Button
+        android:id="@+id/buttonCreateWidget"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/create_floating_widget" />
 </LinearLayout>

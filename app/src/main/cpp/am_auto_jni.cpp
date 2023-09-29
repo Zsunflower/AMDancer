@@ -1,3 +1,5 @@
+#include <thread>
+#include <chrono>
 #include "am_auto_jni.h"
 
 using namespace cv;
@@ -44,7 +46,8 @@ Java_com_autogame_amdancer_ScreenCaptureService_process(
 	jmethodID hold_id = env->GetMethodID(thiz, "hold", "(II)V");
 	jmethodID drag_id = env->GetMethodID(thiz, "drag", "(IIII)V");
 
-	bool has_active, pressing = false;
+	bool has_active;
+	static int pressing = false;
 	Mat hls, l_thresholded;
 	Mat hls_mats[3];
 	vector<Rect> buble_bboxes;
@@ -61,18 +64,17 @@ Java_com_autogame_amdancer_ScreenCaptureService_process(
 		BUBLE_TYPE buble_type = get_buble_type(hls_mats[0], buble_in);
 		if (buble_type == BUBLE_TYPE::PURPLE)
 		{
-//            click(hwndex, buble_in.x + buble_in.width / 2, buble_in.y + buble_in.height / 2 );
 			env->CallVoidMethod(obj, click_id, buble_in.x + buble_in.width / 2,
 								buble_in.y + buble_in.height / 2);
 			LOGD("Click: (%d, %d)", buble_in.x + buble_in.width / 2,
 				 buble_in.y + buble_in.height / 2);
 		} else if (buble_type == BUBLE_TYPE::HOLD)
 		{
-//            hold(hwndex, buble_in.x + buble_in.width / 2, buble_in.y + buble_in.height / 2 );
 			env->CallVoidMethod(obj, hold_id, buble_in.x + buble_in.width / 2,
 								buble_in.y + buble_in.height / 2);
 			LOGD("Hold: (%d, %d)", buble_in.x + buble_in.width / 2,
 				 buble_in.y + buble_in.height / 2);
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		} else if (buble_type == BUBLE_TYPE::YELLOW || buble_type == BUBLE_TYPE::BLUE)
 		{
 			ARROW_TYPE_BB arrow_type = get_arrow_type(l_thresholded, buble_in);
@@ -116,9 +118,9 @@ Java_com_autogame_amdancer_ScreenCaptureService_process(
 				x_end = x_start;
 				y_end = y_start;
 			}
-//            drag(hwndex, x_start, y_start , x_end, y_end );
 			env->CallVoidMethod(obj, drag_id, x_start, y_start, x_end, y_end);
 			LOGD("Drag from (%d, %d) to (%d, %d)", x_start, y_start, x_end, y_end);
+			std::this_thread::sleep_for(std::chrono::milliseconds(400));
 		}
 	}
 	if (buble_bboxes.size() <= 1 && pressing)
@@ -130,8 +132,6 @@ Java_com_autogame_amdancer_ScreenCaptureService_process(
 		{
 			if (!has_border(hls_mats[0], hls_mats[1], buble_config))
 			{
-//                click(hwndex, buble_config.SPACE_BUBLE_BBOX.x + buble_config.SPACE_BUBLE_BBOX.width / 2,
-//                      buble_config.SPACE_BUBLE_BBOX.y + buble_config.SPACE_BUBLE_BBOX.height / 2 );
 				env->CallVoidMethod(obj, click_id, buble_config.SPACE_BUBLE_BBOX.x +
 												   buble_config.SPACE_BUBLE_BBOX.width / 2,
 									buble_config.SPACE_BUBLE_BBOX.y +

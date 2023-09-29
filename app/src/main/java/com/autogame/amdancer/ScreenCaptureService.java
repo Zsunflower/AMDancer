@@ -37,10 +37,8 @@ public class ScreenCaptureService extends Service {
     private static final String START = "START";
     private static final String STOP = "STOP";
     private static final String SCREENCAP_NAME = "screencap";
-
     private static int IMAGES_PRODUCED;
-    AutoAccessibilityService auto_accessibility_service = new AutoAccessibilityService();
-
+    AutoAccessibilityService auto_accessibility_service = null;
     private MediaProjection mMediaProjection;
     private String mStoreDir;
     private ImageReader mImageReader;
@@ -116,6 +114,12 @@ public class ScreenCaptureService extends Service {
                 Looper.loop();
             }
         }.start();
+
+        auto_accessibility_service = AutoAccessibilityService.getInstance();
+        if (auto_accessibility_service != null)
+            Log.e(TAG, "auto_accessibility_service inited");
+        else
+            Log.e(TAG, "auto_accessibility_service uninited");
     }
 
     @Override
@@ -134,7 +138,6 @@ public class ScreenCaptureService extends Service {
         } else {
             stopSelf();
         }
-
         return START_NOT_STICKY;
     }
 
@@ -218,7 +221,6 @@ public class ScreenCaptureService extends Service {
                     int rowPadding = rowStride - pixelStride * mWidth;
                     process(mWidth + rowPadding / pixelStride, mHeight, buffer);
                     IMAGES_PRODUCED++;
-                    Log.e(TAG, "captured image: " + IMAGES_PRODUCED);
                 }
             } catch (Exception e) {
                 e.printStackTrace();

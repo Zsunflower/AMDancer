@@ -17,7 +17,6 @@
 static bool is_init = false;
 static BubleConfig buble_config;
 
-
 # ifdef __cplusplus
 extern "C"
 {
