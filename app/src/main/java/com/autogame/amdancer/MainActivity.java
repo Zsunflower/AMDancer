@@ -19,11 +19,11 @@ import java.io.File;
 import java.util.List;
 
 
-public class ScreenCaptureActivity extends Activity {
+public class MainActivity extends Activity {
     private static final int REQUEST_CODE = 100;
     private static final int SYSTEM_ALERT_WINDOW_PERMISSION = 2084;
 
-    private static final String TAG = "ScreenCaptureActivity";
+    private static final String TAG = "AM Dancer";
 
     // Used to load the 'amdancer' library on application startup.
     static {
@@ -60,8 +60,8 @@ public class ScreenCaptureActivity extends Activity {
         showWidget.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (Settings.canDrawOverlays(ScreenCaptureActivity.this)) {
-                    startService(new Intent(ScreenCaptureActivity.this, FloatingViewService.class));
+                if (Settings.canDrawOverlays(MainActivity.this)) {
+                    startService(new Intent(MainActivity.this, FloatingUIService.class));
                     finish();
                 } else {
                     askPermission();
@@ -114,7 +114,7 @@ public class ScreenCaptureActivity extends Activity {
         List<AccessibilityServiceInfo> enabledServices = am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_GENERIC);
         for (AccessibilityServiceInfo enabledService : enabledServices) {
             ServiceInfo enabledServiceInfo = enabledService.getResolveInfo().serviceInfo;
-            if (enabledServiceInfo.packageName.equals(this.getPackageName()) && enabledServiceInfo.name.equals(AutoAccessibilityService.class.getName()))
+            if (enabledServiceInfo.packageName.equals(this.getPackageName()) && enabledServiceInfo.name.equals(BotAccessibilityService.class.getName()))
                 return true;
         }
         return false;
@@ -122,7 +122,6 @@ public class ScreenCaptureActivity extends Activity {
 
     // Request the user to enable the Accessibility Service
     public void requestAccessibilityService() {
-        Log.e(TAG, "Request for AccessibilityService");
         Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivityForResult(intent, 0);
@@ -132,7 +131,6 @@ public class ScreenCaptureActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE) {
-            Log.e(TAG, "onActivityResult: " + resultCode);
             if (resultCode == Activity.RESULT_OK) {
                 startService(com.autogame.amdancer.ScreenCaptureService.getStartIntent(this, resultCode, data));
             }
@@ -141,7 +139,6 @@ public class ScreenCaptureActivity extends Activity {
 
     /****************************************** UI Widget Callbacks *******************************/
     private void startProjection() {
-        Log.e(TAG, "startProjection");
         MediaProjectionManager mProjectionManager =
                 (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
         startActivityForResult(mProjectionManager.createScreenCaptureIntent(), REQUEST_CODE);

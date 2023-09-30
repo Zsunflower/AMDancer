@@ -9,13 +9,13 @@
         android:id="@+id/startButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/start_recording" />
+        android:text="@string/start_bot" />
 
     <Button
         android:id="@+id/stopButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/stop_recording" />
+        android:text="@string/stop_bot" />
 
     <Button
         android:id="@+id/buttonCreateWidget"

@@ -6,11 +6,11 @@ import android.graphics.Path;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 
-public class AutoAccessibilityService extends AccessibilityService {
+public class BotAccessibilityService extends AccessibilityService {
     private static final String TAG = "ScreenCaptureActivity";
-    private static AutoAccessibilityService mInstance = null;
+    private static BotAccessibilityService mInstance = null;
 
-    public static AutoAccessibilityService getInstance() {
+    public static BotAccessibilityService getInstance() {
         return mInstance;
     }
 

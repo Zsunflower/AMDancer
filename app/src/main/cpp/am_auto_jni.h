@@ -23,8 +23,8 @@ extern "C"
 # endif
 
 JNIEXPORT jboolean JNICALL
-Java_com_autogame_amdancer_ScreenCaptureActivity_initConfig(JNIEnv *env, jobject obj,
-															jstring config_path);
+Java_com_autogame_amdancer_MainActivity_initConfig(JNIEnv *env, jobject obj,
+												   jstring config_path);
 
 JNIEXPORT void JNICALL
 Java_com_autogame_amdancer_ScreenCaptureService_process(JNIEnv *env, jobject obj, jint width,

@@ -1,9 +1,9 @@
 <resources>
-    <string name="app_name">MediaProjectionDemo</string>
+    <string name="app_name">AM Dancer</string>
     <string name="action_settings">Settings</string>
-    <string name="start_recording">Start Recording</string>
-    <string name="stop_recording">Stop Recording</string>
+    <string name="start_bot">Start Bot</string>
+    <string name="stop_bot">Stop Bot</string>
     <string name="recording">Recording</string>
-    <string name="accessibility_service_label"> Auto AccessibilityService </string>
+    <string name="accessibility_service_label">Allow AM Dancer to perform input touch, gesture </string>
     <string name="create_floating_widget">Create Floating Widget</string>
 </resources>

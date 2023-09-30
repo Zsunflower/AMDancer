@@ -14,7 +14,7 @@
         android:theme="@style/AppTheme">
 
         <activity
-            android:name=".ScreenCaptureActivity"
+            android:name=".MainActivity"
             android:configChanges="orientation|screenSize"
             android:exported="true">
             <intent-filter>
@@ -28,11 +28,11 @@
             android:name=".ScreenCaptureService"
             android:foregroundServiceType="mediaProjection" />
         <service
-            android:name=".FloatingViewService"
+            android:name=".FloatingUIService"
             android:enabled="true"
             android:exported="false" />
         <service
-            android:name=".AutoAccessibilityService"
+            android:name=".BotAccessibilityService"
             android:foregroundServiceType="mediaProjection"
             android:label="@string/accessibility_service_label"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"

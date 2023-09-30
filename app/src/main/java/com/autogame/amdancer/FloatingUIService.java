@@ -2,23 +2,23 @@ package com.autogame.amdancer;
 
 import android.annotation.SuppressLint;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
-import android.media.projection.MediaProjectionManager;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
-public class FloatingViewService extends Service implements View.OnClickListener {
+public class FloatingUIService extends Service implements View.OnClickListener {
+    private static final String TAG = "AM Dancer";
     private WindowManager mWindowManager;
     private View mFloatingView;
     private View collapsedView;
     private View expandedView;
 
-    public FloatingViewService() {
+    public FloatingUIService() {
     }
 
     @Override
@@ -54,6 +54,8 @@ public class FloatingViewService extends Service implements View.OnClickListener
         mFloatingView.findViewById(R.id.buttonClose).setOnClickListener(this);
         expandedView.setOnClickListener(this);
 
+        mFloatingView.findViewById(R.id.startButton).setOnClickListener(this);
+        mFloatingView.findViewById(R.id.stopButton).setOnClickListener(this);
         //adding an touchlistener to make drag movement of the floating widget
         mFloatingView.findViewById(R.id.relativeLayoutParent).setOnTouchListener(new View.OnTouchListener() {
             private int initialX;
@@ -104,6 +106,14 @@ public class FloatingViewService extends Service implements View.OnClickListener
             expandedView.setVisibility(View.GONE);
         } else if (id == R.id.buttonClose) {//closing the widget
             stopSelf();
+        }
+        else if(id == R.id.startButton)
+        {
+            Log.e(TAG, "start clicked");
+        }
+        else if(id == R.id.stopButton)
+        {
+            Log.e(TAG, "stop clicked");
         }
     }
 }

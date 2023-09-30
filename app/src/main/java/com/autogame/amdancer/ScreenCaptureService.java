@@ -30,7 +30,7 @@ import java.util.Objects;
 
 public class ScreenCaptureService extends Service {
 
-    private static final String TAG = "ScreenCaptureService";
+    private static final String TAG = "AM Dancer";
     private static final String RESULT_CODE = "RESULT_CODE";
     private static final String DATA = "DATA";
     private static final String ACTION = "ACTION";
@@ -38,7 +38,7 @@ public class ScreenCaptureService extends Service {
     private static final String STOP = "STOP";
     private static final String SCREENCAP_NAME = "screencap";
     private static int IMAGES_PRODUCED;
-    AutoAccessibilityService auto_accessibility_service = null;
+    BotAccessibilityService auto_accessibility_service = null;
     private MediaProjection mMediaProjection;
     private String mStoreDir;
     private ImageReader mImageReader;
@@ -115,7 +115,7 @@ public class ScreenCaptureService extends Service {
             }
         }.start();
 
-        auto_accessibility_service = AutoAccessibilityService.getInstance();
+        auto_accessibility_service = BotAccessibilityService.getInstance();
         if (auto_accessibility_service != null)
             Log.e(TAG, "auto_accessibility_service inited");
         else

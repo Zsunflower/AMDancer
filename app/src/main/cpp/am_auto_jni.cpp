@@ -6,8 +6,8 @@ using namespace cv;
 
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_com_autogame_amdancer_ScreenCaptureActivity_initConfig(JNIEnv *env, jobject obj,
-															jstring config_path)
+Java_com_autogame_amdancer_MainActivity_initConfig(JNIEnv *env, jobject obj,
+												   jstring config_path)
 {
 	const char *_config_path;
 	_config_path = env->GetStringUTFChars(config_path, nullptr);
