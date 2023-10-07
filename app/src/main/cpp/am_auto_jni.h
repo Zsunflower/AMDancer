@@ -9,6 +9,7 @@
 #include <android/log.h>
 #include <opencv2/opencv.hpp>
 #include "buble.h"
+#include "4k.h"
 
 
 #define  LOG_TAG    "AM_AUTO_JNI"
@@ -16,6 +17,8 @@
 
 static bool is_init = false;
 static BubleConfig buble_config;
+static K4Config k4_config;
+static jmethodID click_id, hold_id, drag_id;
 
 # ifdef __cplusplus
 extern "C"
@@ -27,9 +30,19 @@ Java_com_autogame_amdancer_MainActivity_initConfig(JNIEnv *env, jobject obj,
 												   jstring config_path);
 
 JNIEXPORT void JNICALL
+Java_com_autogame_amdancer_ScreenCaptureService_setupCB(JNIEnv *env, jobject obj);
+
+JNIEXPORT jboolean JNICALL
+Java_com_autogame_amdancer_MainActivity_init4kConfig(JNIEnv *env, jobject obj,
+													 jstring config_path);
+
+JNIEXPORT void JNICALL
 Java_com_autogame_amdancer_ScreenCaptureService_process(JNIEnv *env, jobject obj, jint width,
 														jint height, jobject buffer);
 
+JNIEXPORT void JNICALL
+Java_com_autogame_amdancer_ScreenCaptureService_process4k(JNIEnv *env, jobject obj, jint width,
+														  jint height, jobject buffer);
 
 # ifdef __cplusplus
 }

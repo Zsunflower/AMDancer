@@ -91,6 +91,18 @@ public class MainActivity extends Activity {
                 else
                     Log.e(TAG, "Buble config file parse failed!");
             }
+
+            File buble_4k_config_file = new File(configDir + "buble_config_4k.ini");
+            if (!buble_4k_config_file.exists()) {
+                Log.e(TAG, "Buble 4k config file not found!");
+            } else {
+                Log.e(TAG, "Buble 4k config file: " + buble_4k_config_file.getAbsolutePath());
+                boolean status = init4kConfig(buble_4k_config_file.getAbsolutePath());
+                if (status)
+                    Log.e(TAG, "Buble config 4k file parse success!");
+                else
+                    Log.e(TAG, "Buble config 4k file parse failed!");
+            }
         }
         if (!isAccessibilityServiceEnabled())
             requestAccessibilityService();
@@ -149,4 +161,6 @@ public class MainActivity extends Activity {
     }
 
     public native boolean initConfig(String config_path);
+
+    public native boolean init4kConfig(String config_path);
 }

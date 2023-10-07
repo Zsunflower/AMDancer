@@ -3,6 +3,7 @@ package com.autogame.amdancer;
 import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.util.Log;
@@ -58,20 +59,11 @@ public class FloatingUIService extends Service implements View.OnClickListener {
         mFloatingView.findViewById(R.id.stopButton).setOnClickListener(this);
         //adding an touchlistener to make drag movement of the floating widget
         mFloatingView.findViewById(R.id.relativeLayoutParent).setOnTouchListener(new View.OnTouchListener() {
-            private int initialX;
-            private int initialY;
-            private float initialTouchX;
-            private float initialTouchY;
-
             @SuppressLint("ClickableViewAccessibility")
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        initialX = params.x;
-                        initialY = params.y;
-                        initialTouchX = event.getRawX();
-                        initialTouchY = event.getRawY();
                         return true;
 
                     case MotionEvent.ACTION_UP:
@@ -82,14 +74,19 @@ public class FloatingUIService extends Service implements View.OnClickListener {
 
                     case MotionEvent.ACTION_MOVE:
                         //this code is helping the widget to move around the screen with fingers
-                        params.x = initialX + (int) (event.getRawX() - initialTouchX);
-                        params.y = initialY + (int) (event.getRawY() - initialTouchY);
-                        mWindowManager.updateViewLayout(mFloatingView, params);
                         return true;
                 }
                 return false;
             }
         });
+        moveToMiddleTop(params);
+    }
+
+    public void moveToMiddleTop(WindowManager.LayoutParams params) {
+        int mHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
+        params.x = 0;
+        params.y = -mHeight;
+        mWindowManager.updateViewLayout(mFloatingView, params);
     }
 
     @Override
@@ -106,13 +103,10 @@ public class FloatingUIService extends Service implements View.OnClickListener {
             expandedView.setVisibility(View.GONE);
         } else if (id == R.id.buttonClose) {//closing the widget
             stopSelf();
-        }
-        else if(id == R.id.startButton)
-        {
+        } else if (id == R.id.startButton) {
             Log.e(TAG, "start clicked");
-        }
-        else if(id == R.id.stopButton)
-        {
+
+        } else if (id == R.id.stopButton) {
             Log.e(TAG, "stop clicked");
         }
     }

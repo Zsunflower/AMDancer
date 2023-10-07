@@ -43,6 +43,8 @@ add_library(${CMAKE_PROJECT_NAME} SHARED
         utils.cpp
         buble.h
         buble.cpp
+        4k.h
+        4k.cpp
         am_auto_jni.h
         am_auto_jni.cpp)
 

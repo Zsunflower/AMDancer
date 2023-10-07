@@ -120,6 +120,7 @@ public class ScreenCaptureService extends Service {
             Log.e(TAG, "auto_accessibility_service inited");
         else
             Log.e(TAG, "auto_accessibility_service uninited");
+        setupCB();
     }
 
     @Override
@@ -193,8 +194,11 @@ public class ScreenCaptureService extends Service {
         mImageReader.setOnImageAvailableListener(new ImageAvailableListener(), mHandler);
     }
 
+    public native void setupCB();
+
     public native void process(int width, int height, ByteBuffer buffer);
 
+    public native void process4k(int width, int height, ByteBuffer buffer);
 
     public void click(int x, int y) {
         auto_accessibility_service.click(x, y);
@@ -219,7 +223,8 @@ public class ScreenCaptureService extends Service {
                     int pixelStride = planes[0].getPixelStride();
                     int rowStride = planes[0].getRowStride();
                     int rowPadding = rowStride - pixelStride * mWidth;
-                    process(mWidth + rowPadding / pixelStride, mHeight, buffer);
+//                    process(mWidth + rowPadding / pixelStride, mHeight, buffer);
+                    process4k(mWidth + rowPadding / pixelStride, mHeight, buffer);
                     IMAGES_PRODUCED++;
                 }
             } catch (Exception e) {
