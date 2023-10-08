@@ -45,7 +45,7 @@ jstring config_path
 );
 
 JNIEXPORT void JNICALL
-Java_com_autogame_amdancer_ScreenCaptureService_process(JNIEnv
+Java_com_autogame_amdancer_ScreenCaptureService_processBB(JNIEnv
 *env,
 jobject obj, jint
 width,

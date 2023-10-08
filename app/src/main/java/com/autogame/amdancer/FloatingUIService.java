@@ -58,8 +58,8 @@ public class FloatingUIService extends Service implements View.OnClickListener {
         mFloatingView.findViewById(R.id.buttonClose).setOnClickListener(this);
         expandedView.setOnClickListener(this);
 
-        mFloatingView.findViewById(R.id.startButton).setOnClickListener(this);
-        mFloatingView.findViewById(R.id.stopButton).setOnClickListener(this);
+        mFloatingView.findViewById(R.id.startButton_4k).setOnClickListener(this);
+        mFloatingView.findViewById(R.id.startButton_BB).setOnClickListener(this);
         //adding an touchlistener to make drag movement of the floating widget
         mFloatingView.findViewById(R.id.relativeLayoutParent).setOnTouchListener(new View.OnTouchListener() {
             @SuppressLint("ClickableViewAccessibility")
@@ -114,12 +114,14 @@ public class FloatingUIService extends Service implements View.OnClickListener {
             expandedView.setVisibility(View.GONE);
         } else if (id == R.id.buttonClose) {//closing the widget
             stopSelf();
-        } else if (id == R.id.startButton) {
-            Log.e(TAG, "start clicked");
+        } else if (id == R.id.startButton_4k) {
+            Log.e(TAG, "start 4k mode");
+            ScreenCaptureService.PLAY_MODE = ScreenCaptureService.FK_MODE;
             startProjection();
-        } else if (id == R.id.stopButton) {
-            Log.e(TAG, "stop clicked");
-            stopProjection();
+        } else if (id == R.id.startButton_BB) {
+            Log.e(TAG, "start BB mode");
+            ScreenCaptureService.PLAY_MODE = ScreenCaptureService.BB_MODE;
+            startProjection();
         }
     }
 

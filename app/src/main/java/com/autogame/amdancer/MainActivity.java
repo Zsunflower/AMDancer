@@ -38,27 +38,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // start projection
-        Button startButton = findViewById(R.id.startButton);
-        startButton.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                startProjection();
-            }
-        });
-
-        // stop projection
-        Button stopButton = findViewById(R.id.stopButton);
-        stopButton.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                stopProjection();
-            }
-        });
-
-        Button showWidget = findViewById(R.id.buttonCreateWidget);
+        Button showWidget = findViewById(R.id.startButton);
         showWidget.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -115,6 +95,7 @@ public class MainActivity extends Activity {
         if (!Settings.canDrawOverlays(this)) {
             askPermission();
         }
+        requireCapturePermission();
         Log.e(TAG, "request result: " + isAccessibilityServiceEnabled());
     }
 
@@ -157,14 +138,10 @@ public class MainActivity extends Activity {
     }
 
     /****************************************** UI Widget Callbacks *******************************/
-    private void startProjection() {
+    private void requireCapturePermission() {
         MediaProjectionManager mProjectionManager =
                 (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
         startActivityForResult(mProjectionManager.createScreenCaptureIntent(), REQUEST_CODE);
-    }
-
-    private void stopProjection() {
-        startService(com.autogame.amdancer.ScreenCaptureService.getStopIntent(this));
     }
 
     public native boolean initConfig(String config_path);

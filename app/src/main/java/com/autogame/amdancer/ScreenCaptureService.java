@@ -29,7 +29,9 @@ import java.nio.ByteBuffer;
 import java.util.Objects;
 
 public class ScreenCaptureService extends Service {
-
+    public static final int FK_MODE = 0;
+    public static final int BB_MODE = 1;
+    public static int PLAY_MODE = BB_MODE;
     private static final String TAG = "AM Dancer";
     private static final String RESULT_CODE = "RESULT_CODE";
     private static final String DATA = "DATA";
@@ -196,7 +198,7 @@ public class ScreenCaptureService extends Service {
 
     public native void setupCB();
 
-    public native void process(int width, int height, ByteBuffer buffer);
+    public native void processBB(int width, int height, ByteBuffer buffer);
 
     public native void process4k(int width, int height, ByteBuffer buffer);
 
@@ -223,8 +225,14 @@ public class ScreenCaptureService extends Service {
                     int pixelStride = planes[0].getPixelStride();
                     int rowStride = planes[0].getRowStride();
                     int rowPadding = rowStride - pixelStride * mWidth;
-//                    process(mWidth + rowPadding / pixelStride, mHeight, buffer);
-                    process4k(mWidth + rowPadding / pixelStride, mHeight, buffer);
+                    if (PLAY_MODE == BB_MODE)
+                    {
+                        processBB(mWidth + rowPadding / pixelStride, mHeight, buffer);
+                    }
+                    else
+                    {
+                        process4k(mWidth + rowPadding / pixelStride, mHeight, buffer);
+                    }
                     IMAGES_PRODUCED++;
                 }
             } catch (Exception e) {

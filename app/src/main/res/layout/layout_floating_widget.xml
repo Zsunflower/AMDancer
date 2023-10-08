@@ -20,8 +20,8 @@
 
             <ImageView
                 android:id="@+id/collapsed_iv"
-                android:layout_width="70dp"
-                android:layout_height="70dp"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
                 android:layout_marginTop="8dp"
                 android:src="@drawable/icon_simplified_coding" />
 
@@ -45,8 +45,8 @@
 
             <ImageView
                 android:id="@+id/buttonSimplifiedCodingExpanded"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
                 android:src="@drawable/icon_simplified_coding"
                 tools:ignore="ContentDescription" />
 
@@ -57,16 +57,16 @@
                 android:orientation="horizontal">
 
                 <Button
-                    android:id="@+id/startButton"
+                    android:id="@+id/startButton_4k"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/start_bot" />
+                    android:text="@string/start_4k" />
 
                 <Button
-                    android:id="@+id/stopButton"
+                    android:id="@+id/startButton_BB"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/stop_bot" />
+                    android:text="@string/start_bb" />
             </LinearLayout>
 
         </LinearLayout>

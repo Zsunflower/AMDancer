@@ -82,7 +82,7 @@ drag_id = env->GetMethodID(thiz, "drag", "(IIII)V");
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_autogame_amdancer_ScreenCaptureService_process(
+Java_com_autogame_amdancer_ScreenCaptureService_processBB(
 		JNIEnv
 *env,
 jobject obj,
