@@ -1,6 +1,7 @@
 package com.autogame.amdancer;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Service;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -14,6 +15,8 @@ import android.view.WindowManager;
 
 public class FloatingUIService extends Service implements View.OnClickListener {
     private static final String TAG = "AM Dancer";
+    private int cap_result_code = -1;
+    private Intent cap_intent = null;
     private WindowManager mWindowManager;
     private View mFloatingView;
     private View collapsedView;
@@ -82,6 +85,14 @@ public class FloatingUIService extends Service implements View.OnClickListener {
         moveToMiddleTop(params);
     }
 
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        cap_result_code = intent.getIntExtra("RESULT_CODE", Activity.RESULT_CANCELED);
+        cap_intent = intent.getParcelableExtra("DATA");
+        Log.e(TAG, "Recive code: " + cap_result_code);
+        return START_NOT_STICKY;
+    }
+
     public void moveToMiddleTop(WindowManager.LayoutParams params) {
         int mHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
         params.x = 0;
@@ -105,9 +116,18 @@ public class FloatingUIService extends Service implements View.OnClickListener {
             stopSelf();
         } else if (id == R.id.startButton) {
             Log.e(TAG, "start clicked");
-
+            startProjection();
         } else if (id == R.id.stopButton) {
             Log.e(TAG, "stop clicked");
+            stopProjection();
         }
+    }
+
+    private void startProjection() {
+        startService(com.autogame.amdancer.ScreenCaptureService.getStartIntent(getApplicationContext(), cap_result_code, cap_intent));
+    }
+
+    private void stopProjection() {
+        startService(com.autogame.amdancer.ScreenCaptureService.getStopIntent(getApplicationContext()));
     }
 }

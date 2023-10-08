@@ -29,7 +29,7 @@ bool parse_str_rect(const std::string &s, cv::Rect &rect)
 {
 	std::istringstream ss(s);
 	std::string token;
-	std::vector<std::string> tokens;
+	std::vector <std::string> tokens;
 
 	while (std::getline(ss, token, ','))
 	{

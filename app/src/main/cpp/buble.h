@@ -69,10 +69,10 @@ ARROW_TYPE_BB get_arrow_type(const Mat &thresholded, const Rect &rect);
 
 BUBLE_TYPE get_buble_type(const Mat &h_channel, const Rect &rect);
 
-void find_bubles(const Mat &l_thresholded, vector<Rect> &buble_bboxes, int delta_wh_threshold,
+void find_bubles(const Mat &l_thresholded, vector <Rect> &buble_bboxes, int delta_wh_threshold,
 				 int size_threshold, int wh_noise);
 
-bool get_active_buble(vector<Rect> &buble_bboxes, Rect &buble_in, Rect &buble_out);
+bool get_active_buble(vector <Rect> &buble_bboxes, Rect &buble_in, Rect &buble_out);
 
 string get_buble_name(BUBLE_TYPE bb_type);
 

@@ -22,13 +22,15 @@ import java.util.List;
 public class MainActivity extends Activity {
     private static final int REQUEST_CODE = 100;
     private static final int SYSTEM_ALERT_WINDOW_PERMISSION = 2084;
-
     private static final String TAG = "AM Dancer";
 
     // Used to load the 'amdancer' library on application startup.
     static {
         System.loadLibrary("amdancer");
     }
+
+    private int cap_result_code = -1;
+    private Intent cap_intent = null;
 
     /****************************************** Activity Lifecycle methods ************************/
     @Override
@@ -61,7 +63,10 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View view) {
                 if (Settings.canDrawOverlays(MainActivity.this)) {
-                    startService(new Intent(MainActivity.this, FloatingUIService.class));
+                    Intent float_ui_intent = new Intent(MainActivity.this, FloatingUIService.class);
+                    float_ui_intent.putExtra("RESULT_CODE", cap_result_code);
+                    float_ui_intent.putExtra("DATA", cap_intent);
+                    startService(float_ui_intent);
                     finish();
                 } else {
                     askPermission();
@@ -144,7 +149,9 @@ public class MainActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
-                startService(com.autogame.amdancer.ScreenCaptureService.getStartIntent(this, resultCode, data));
+                cap_result_code = resultCode;
+                cap_intent = data;
+                Log.e(TAG, "Setup createScreenCaptureIntent done");
             }
         }
     }

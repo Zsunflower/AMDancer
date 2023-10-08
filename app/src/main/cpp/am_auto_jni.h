@@ -25,24 +25,40 @@ extern "C"
 {
 # endif
 
-JNIEXPORT jboolean JNICALL
+JNIEXPORT jboolean
+
+JNICALL
 Java_com_autogame_amdancer_MainActivity_initConfig(JNIEnv *env, jobject obj,
 												   jstring config_path);
 
 JNIEXPORT void JNICALL
-Java_com_autogame_amdancer_ScreenCaptureService_setupCB(JNIEnv *env, jobject obj);
+Java_com_autogame_amdancer_ScreenCaptureService_setupCB(JNIEnv
+*env,
+jobject obj
+);
 
-JNIEXPORT jboolean JNICALL
-Java_com_autogame_amdancer_MainActivity_init4kConfig(JNIEnv *env, jobject obj,
-													 jstring config_path);
+JNIEXPORT jboolean
+JNICALL
+		Java_com_autogame_amdancer_MainActivity_init4kConfig(JNIEnv * env, jobject
+obj,
+jstring config_path
+);
 
 JNIEXPORT void JNICALL
-Java_com_autogame_amdancer_ScreenCaptureService_process(JNIEnv *env, jobject obj, jint width,
-														jint height, jobject buffer);
+Java_com_autogame_amdancer_ScreenCaptureService_process(JNIEnv
+*env,
+jobject obj, jint
+width,
+jint height, jobject
+buffer);
 
 JNIEXPORT void JNICALL
-Java_com_autogame_amdancer_ScreenCaptureService_process4k(JNIEnv *env, jobject obj, jint width,
-														  jint height, jobject buffer);
+Java_com_autogame_amdancer_ScreenCaptureService_process4k(JNIEnv
+*env,
+jobject obj, jint
+width,
+jint height, jobject
+buffer);
 
 # ifdef __cplusplus
 }
