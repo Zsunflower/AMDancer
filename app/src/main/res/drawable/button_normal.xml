@@ -1,0 +1,6 @@
+<!-- Example of button_normal.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#808080" /> <!-- Background color in normal state -->
+    <!-- Other attributes like corner radius, stroke, etc. can be added -->
+</shape>

@@ -60,12 +60,14 @@
                     android:id="@+id/startButton_4k"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/button_normal"
                     android:text="@string/start_4k" />
 
                 <Button
                     android:id="@+id/startButton_BB"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/button_normal"
                     android:text="@string/start_bb" />
             </LinearLayout>
 

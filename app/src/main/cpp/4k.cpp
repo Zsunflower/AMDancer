@@ -101,8 +101,8 @@ void K4Config::print_config() const
 	LOGD("per_box: (%d, %d, %d, %d)", per_box.x, per_box.y, per_box.width, per_box.height);
 }
 
-bool process_arrows_key_image(const Mat &arrows_img, Rect &current_box, vector <Rect> &left_boxes,
-							  vector <ARROW_TYPE_4K> &arrows)
+bool process_arrows_key_image(const Mat &arrows_img, Rect &current_box, vector<Rect> &left_boxes,
+							  vector<ARROW_TYPE_4K> &arrows)
 {
 	left_boxes.clear();
 	arrows.clear();
@@ -112,10 +112,10 @@ bool process_arrows_key_image(const Mat &arrows_img, Rect &current_box, vector <
 	split(hls, hls_mats);
 	inRange(hls_mats[1], 200, 255, mask);
 
-	vector <vector<Point>> contours;
-	vector <Vec4i> hierarchicals;
+	vector<vector<Point>> contours;
+	vector<Vec4i> hierarchicals;
 	findContours(mask, contours, hierarchicals, RETR_CCOMP, CHAIN_APPROX_SIMPLE);
-	vector <Rect> arrow_boxes;
+	vector<Rect> arrow_boxes;
 
 	for (int i = 0; i < contours.size(); ++i)
 	{
@@ -146,8 +146,8 @@ bool process_arrows_key_image(const Mat &arrows_img, Rect &current_box, vector <
 }
 
 
-void get_arrow(const Mat &thresholed, const vector <Rect> &arrow_boxes, const Mat &h_channel,
-			   vector <ARROW_TYPE_4K> &arrows)
+void get_arrow(const Mat &thresholed, const vector<Rect> &arrow_boxes, const Mat &h_channel,
+			   vector<ARROW_TYPE_4K> &arrows)
 {
 	for (auto &arrow_box: arrow_boxes)
 	{

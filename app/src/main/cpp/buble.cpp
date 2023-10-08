@@ -45,8 +45,8 @@ ARROW_TYPE_BB get_arrow_type(const Mat &thresholded, const Rect &rect)
 	Mat buble_arrow_img = thresholded(rect_ext);
 	delta /= 2;
 	Mat eroded, kernel;
-	vector <vector<Point>> contours;
-	vector <Vec4i> hierarchy;
+	vector<vector<Point>> contours;
+	vector<Vec4i> hierarchy;
 
 	// Check up/down type
 	kernel = getStructuringElement(MORPH_RECT, Size(1, delta));
@@ -193,11 +193,11 @@ BUBLE_TYPE get_buble_type(const Mat &h_channel, const Rect &rect)
 	return BUBLE_TYPE::BUBLE_UNK;
 }
 
-void find_bubles(const Mat &l_thresholded, vector <Rect> &buble_bboxes, int delta_wh_threshold,
+void find_bubles(const Mat &l_thresholded, vector<Rect> &buble_bboxes, int delta_wh_threshold,
 				 int size_threshold, int wh_noise)
 {
-	vector <vector<Point>> contours;
-	vector <Vec4i> hierarchy;
+	vector<vector<Point>> contours;
+	vector<Vec4i> hierarchy;
 	findContours(l_thresholded, contours, hierarchy, RETR_CCOMP, CHAIN_APPROX_SIMPLE);
 	buble_bboxes.clear();
 	for (int i = 0; i < contours.size(); ++i)
@@ -220,7 +220,7 @@ void find_bubles(const Mat &l_thresholded, vector <Rect> &buble_bboxes, int delt
 	}
 }
 
-bool get_active_buble(vector <Rect> &buble_bboxes, Rect &buble_in, Rect &buble_out)
+bool get_active_buble(vector<Rect> &buble_bboxes, Rect &buble_in, Rect &buble_out)
 {
 	if (buble_bboxes.size() < 2)
 		return false;
@@ -257,8 +257,8 @@ bool has_border(const Mat &h_img, const Mat &l_img, BubleConfig &buble_config)
 	inRange(l_img(buble_config.SPACE_BUBLE_BBOX_EXT), 140, 250, l_mask);
 	inRange(h_img(buble_config.SPACE_BUBLE_BBOX_EXT), 70, 100, h_mask);
 	bitwise_and(l_mask, h_mask, mask);
-	vector <vector<Point>> contours;
-	vector <Vec4i> hierarchy;
+	vector<vector<Point>> contours;
+	vector<Vec4i> hierarchy;
 	findContours(mask, contours, hierarchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
 
 	for (auto &ct: contours)
@@ -294,7 +294,7 @@ bool BubleConfig::parse_config(const string &config_path)
 			{
 				std::istringstream ss(value);
 				string token;
-				vector <string> tokens;
+				vector<string> tokens;
 
 				while (std::getline(ss, token, ','))
 				{

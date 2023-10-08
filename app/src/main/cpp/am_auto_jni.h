@@ -33,32 +33,32 @@ Java_com_autogame_amdancer_MainActivity_initConfig(JNIEnv *env, jobject obj,
 
 JNIEXPORT void JNICALL
 Java_com_autogame_amdancer_ScreenCaptureService_setupCB(JNIEnv
-*env,
-jobject obj
+														*env,
+														jobject obj
 );
 
 JNIEXPORT jboolean
 JNICALL
-		Java_com_autogame_amdancer_MainActivity_init4kConfig(JNIEnv * env, jobject
+Java_com_autogame_amdancer_MainActivity_init4kConfig(JNIEnv *env, jobject
 obj,
-jstring config_path
+													 jstring config_path
 );
 
 JNIEXPORT void JNICALL
 Java_com_autogame_amdancer_ScreenCaptureService_processBB(JNIEnv
-*env,
-jobject obj, jint
-width,
-jint height, jobject
-buffer);
+														  *env,
+														  jobject obj, jint
+														  width,
+														  jint height, jobject
+														  buffer);
 
 JNIEXPORT void JNICALL
 Java_com_autogame_amdancer_ScreenCaptureService_process4k(JNIEnv
-*env,
-jobject obj, jint
-width,
-jint height, jobject
-buffer);
+														  *env,
+														  jobject obj, jint
+														  width,
+														  jint height, jobject
+														  buffer);
 
 # ifdef __cplusplus
 }

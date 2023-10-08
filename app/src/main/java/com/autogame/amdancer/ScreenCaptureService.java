@@ -31,7 +31,7 @@ import java.util.Objects;
 public class ScreenCaptureService extends Service {
     public static final int FK_MODE = 0;
     public static final int BB_MODE = 1;
-    public static int PLAY_MODE = BB_MODE;
+    public static final int UNK_MODE = -1;
     private static final String TAG = "AM Dancer";
     private static final String RESULT_CODE = "RESULT_CODE";
     private static final String DATA = "DATA";
@@ -39,6 +39,7 @@ public class ScreenCaptureService extends Service {
     private static final String START = "START";
     private static final String STOP = "STOP";
     private static final String SCREENCAP_NAME = "screencap";
+    public static int PLAY_MODE = UNK_MODE;
     private static int IMAGES_PRODUCED;
     BotAccessibilityService auto_accessibility_service = null;
     private MediaProjection mMediaProjection;
@@ -225,12 +226,9 @@ public class ScreenCaptureService extends Service {
                     int pixelStride = planes[0].getPixelStride();
                     int rowStride = planes[0].getRowStride();
                     int rowPadding = rowStride - pixelStride * mWidth;
-                    if (PLAY_MODE == BB_MODE)
-                    {
+                    if (PLAY_MODE == BB_MODE) {
                         processBB(mWidth + rowPadding / pixelStride, mHeight, buffer);
-                    }
-                    else
-                    {
+                    } else {
                         process4k(mWidth + rowPadding / pixelStride, mHeight, buffer);
                     }
                     IMAGES_PRODUCED++;

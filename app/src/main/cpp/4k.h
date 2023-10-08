@@ -43,10 +43,10 @@ public:
 	void print_config(void) const;
 };
 
-bool process_arrows_key_image(const Mat &arrows_img, Rect &current_box, vector <Rect> &left_boxes,
-							  vector <ARROW_TYPE_4K> &arrows);
+bool process_arrows_key_image(const Mat &arrows_img, Rect &current_box, vector<Rect> &left_boxes,
+							  vector<ARROW_TYPE_4K> &arrows);
 
-void get_arrow(const Mat &thresholed, const vector <Rect> &arrow_boxes, const Mat &image,
-			   vector <ARROW_TYPE_4K> &arrows);
+void get_arrow(const Mat &thresholed, const vector<Rect> &arrow_boxes, const Mat &image,
+			   vector<ARROW_TYPE_4K> &arrows);
 
 #endif //AMDANCER_4K_H

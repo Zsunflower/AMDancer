@@ -115,13 +115,27 @@ public class FloatingUIService extends Service implements View.OnClickListener {
         } else if (id == R.id.buttonClose) {//closing the widget
             stopSelf();
         } else if (id == R.id.startButton_4k) {
-            Log.e(TAG, "start 4k mode");
-            ScreenCaptureService.PLAY_MODE = ScreenCaptureService.FK_MODE;
-            startProjection();
+            if (ScreenCaptureService.PLAY_MODE != ScreenCaptureService.FK_MODE) {
+                ScreenCaptureService.PLAY_MODE = ScreenCaptureService.FK_MODE;
+                startProjection();
+                mFloatingView.findViewById(R.id.startButton_BB).setBackgroundResource(R.drawable.button_normal);
+                mFloatingView.findViewById(R.id.startButton_4k).setBackgroundResource(R.drawable.button_selected);
+            } else {
+                stopProjection();
+                mFloatingView.findViewById(R.id.startButton_4k).setBackgroundResource(R.drawable.button_normal);
+                ScreenCaptureService.PLAY_MODE = ScreenCaptureService.UNK_MODE;
+            }
         } else if (id == R.id.startButton_BB) {
-            Log.e(TAG, "start BB mode");
-            ScreenCaptureService.PLAY_MODE = ScreenCaptureService.BB_MODE;
-            startProjection();
+            if (ScreenCaptureService.PLAY_MODE != ScreenCaptureService.BB_MODE) {
+                ScreenCaptureService.PLAY_MODE = ScreenCaptureService.BB_MODE;
+                startProjection();
+                mFloatingView.findViewById(R.id.startButton_4k).setBackgroundResource(R.drawable.button_normal);
+                mFloatingView.findViewById(R.id.startButton_BB).setBackgroundResource(R.drawable.button_selected);
+            } else {
+                stopProjection();
+                mFloatingView.findViewById(R.id.startButton_BB).setBackgroundResource(R.drawable.button_normal);
+                ScreenCaptureService.PLAY_MODE = ScreenCaptureService.UNK_MODE;
+            }
         }
     }
 
