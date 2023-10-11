@@ -113,6 +113,7 @@ public class FloatingUIService extends Service implements View.OnClickListener {
             collapsedView.setVisibility(View.VISIBLE);
             expandedView.setVisibility(View.GONE);
         } else if (id == R.id.buttonClose) {//closing the widget
+            stopProjection();
             stopSelf();
         } else if (id == R.id.startButton_4k) {
             if (ScreenCaptureService.PLAY_MODE != ScreenCaptureService.FK_MODE) {
