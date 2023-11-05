@@ -35,8 +35,7 @@ public class MainActivity extends Activity {
         System.loadLibrary("amdancer");
     }
 
-    private int cap_result_code = -1;
-    private Intent cap_intent = null;
+    private boolean is_screencapture_service_started = false;
 
     // Check if the Accessibility Service is enabled
     public static boolean isAccessibilityServiceEnabled(Context context, Class<?> accessibilityService) {
@@ -68,34 +67,30 @@ public class MainActivity extends Activity {
 
         Button showWidget = findViewById(R.id.startButton);
         showWidget.setOnClickListener(view -> {
-            if (cap_intent == null) {
-                requireCapturePermission();
+            if (!is_screencapture_service_started) {
+                startProjection();
                 return;
             }
             if (checkForOverlayPermission() && checkForAccessibilityPermission() && checkForAccessibilityConnected()) {
                 Intent float_ui_intent = new Intent(MainActivity.this, FloatingUIService.class);
-                float_ui_intent.putExtra("RESULT_CODE", cap_result_code);
-                float_ui_intent.putExtra("DATA", cap_intent);
                 startService(float_ui_intent);
-                finish();
             }
         });
 
-        requireCapturePermission();
         File externalFilesDir = getExternalFilesDir(null);
         if (externalFilesDir != null) {
             String configDir = externalFilesDir.getAbsolutePath() + "/configs/";
             File storeDirectory = new File(configDir);
-            if (!storeDirectory.exists()) {
-                boolean success = storeDirectory.mkdirs();
-                if (!success) {
-                    Log.e(TAG, "Failed to create configs directory.");
-                }
+
+            if (storeDirectory.exists() || storeDirectory.mkdirs()) {
+                extract_configs(configDir);
+                setConfigPath(configDir);
+                initConfig();
+                init4kConfig();
+                Log.e(TAG, "Setup config directory success!");
+            } else {
+                Log.e(TAG, "Failed to create the config directory!");
             }
-            extract_configs(configDir);
-            setConfigPath(configDir);
-            initConfig();
-            init4kConfig();
         }
     }
 
@@ -132,6 +127,14 @@ public class MainActivity extends Activity {
             }
         }
         Log.e(TAG, "This device don't support 4k mode");
+    }
+
+    @Override
+    public void onDestroy() {
+        Intent float_ui_intent = new Intent(MainActivity.this, FloatingUIService.class);
+        stopService(float_ui_intent);
+        Log.e(TAG, "Stop FloatingUI Service");
+        super.onDestroy();
     }
 
     private void copyFile(InputStream in, OutputStream out) throws IOException {
@@ -213,15 +216,13 @@ public class MainActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE) {
             if (resultCode == Activity.RESULT_OK) {
-                cap_result_code = resultCode;
-                cap_intent = data;
-                Log.e(TAG, "Setup createScreenCaptureIntent done");
+                startService(com.autogame.amdancer.ScreenCaptureService.getStartIntent(this, resultCode, data));
+                is_screencapture_service_started = true;
             }
         }
     }
 
-    /****************************************** UI Widget Callbacks *******************************/
-    private void requireCapturePermission() {
+    private void startProjection() {
         MediaProjectionManager mProjectionManager =
                 (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
         startActivityForResult(mProjectionManager.createScreenCaptureIntent(), REQUEST_CODE);

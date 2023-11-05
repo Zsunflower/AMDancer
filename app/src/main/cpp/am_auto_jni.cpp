@@ -227,7 +227,7 @@ Java_com_autogame_amdancer_ScreenCaptureService_process4k(
 	);
 	if (bgr_image.cols != k4_config.WIDTH || bgr_image.rows != k4_config.HEIGHT)
 	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		return;
 	}
 	static int pressing = false;

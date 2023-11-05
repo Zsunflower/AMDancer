@@ -115,7 +115,7 @@ public class ScreenCaptureService extends Service {
                 Looper.loop();
             }
         }.start();
-
+        Log.e(TAG, "ScreenCaptureService onCreate .");
         auto_accessibility_service = BotAccessibilityService.getInstance();
         setupCB();
     }
@@ -221,11 +221,12 @@ public class ScreenCaptureService extends Service {
                     int rowStride = planes[0].getRowStride();
                     int rowPadding = rowStride - pixelStride * mWidth;
                     if (PLAY_MODE == BB_MODE) {
-//                        processBB(mWidth + rowPadding / pixelStride, mHeight, buffer);
-                        Thread.sleep(10);
+                        processBB(mWidth + rowPadding / pixelStride, mHeight, buffer);
                     } else if (PLAY_MODE == FK_MODE) {
-//                        process4k(mWidth + rowPadding / pixelStride, mHeight, buffer);
-                        Thread.sleep(10);
+                        process4k(mWidth + rowPadding / pixelStride, mHeight, buffer);
+                    } else {
+                        Thread.sleep(1000);
+                        Log.e(TAG, "Sleep UNK");
                     }
                 }
             } catch (Exception e) {

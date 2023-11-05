@@ -1,7 +1,6 @@
 package com.autogame.amdancer;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.Service;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -10,7 +9,6 @@ import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.os.IBinder;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -18,8 +16,6 @@ import android.view.WindowManager;
 
 public class FloatingUIService extends Service implements View.OnClickListener {
     private static final String TAG = "AM Dancer";
-    private int cap_result_code = -1;
-    private Intent cap_intent = null;
     private WindowManager mWindowManager;
     private View mFloatingView;
     private View collapsedView;
@@ -89,9 +85,6 @@ public class FloatingUIService extends Service implements View.OnClickListener {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        cap_result_code = intent.getIntExtra("RESULT_CODE", Activity.RESULT_CANCELED);
-        cap_intent = intent.getParcelableExtra("DATA");
-        Log.e(TAG, "Recive code: " + cap_result_code);
         return START_NOT_STICKY;
     }
 
@@ -123,32 +116,24 @@ public class FloatingUIService extends Service implements View.OnClickListener {
         } else if (id == R.id.startButton_4k) {
             if (ScreenCaptureService.PLAY_MODE != ScreenCaptureService.FK_MODE) {
                 ScreenCaptureService.PLAY_MODE = ScreenCaptureService.FK_MODE;
-                startProjection();
                 PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP);
                 mFloatingView.findViewById(R.id.startButton_4k).getBackground().setColorFilter(colorFilter);
                 mFloatingView.findViewById(R.id.startButton_BB).getBackground().clearColorFilter();
             } else {
-                stopProjection();
                 mFloatingView.findViewById(R.id.startButton_4k).getBackground().clearColorFilter();
                 ScreenCaptureService.PLAY_MODE = ScreenCaptureService.UNK_MODE;
             }
         } else if (id == R.id.startButton_BB) {
             if (ScreenCaptureService.PLAY_MODE != ScreenCaptureService.BB_MODE) {
                 ScreenCaptureService.PLAY_MODE = ScreenCaptureService.BB_MODE;
-                startProjection();
                 PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP); //DST_ATOP
                 mFloatingView.findViewById(R.id.startButton_BB).getBackground().setColorFilter(colorFilter);
                 mFloatingView.findViewById(R.id.startButton_4k).getBackground().clearColorFilter();
             } else {
-                stopProjection();
                 mFloatingView.findViewById(R.id.startButton_BB).getBackground().clearColorFilter();
                 ScreenCaptureService.PLAY_MODE = ScreenCaptureService.UNK_MODE;
             }
         }
-    }
-
-    private void startProjection() {
-        startService(com.autogame.amdancer.ScreenCaptureService.getStartIntent(getApplicationContext(), cap_result_code, cap_intent));
     }
 
     private void stopProjection() {
