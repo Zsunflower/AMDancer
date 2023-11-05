@@ -54,14 +54,20 @@ class BubleConfig
 {
 public:
 	Rect SPACE_BUBLE_BBOX, SPACE_BUBLE_BBOX_EXT;
+	Rect SPACE_BUBLE_BBOX_IN;
 	int WIDTH, HEIGHT;
 	int DELTA, MIN_BUBLE_SIZE, MAX_DELTA_BUBLE_WH, NOISE_SIZE;
+	bool is_init = false;
 public:
 	BubleConfig() = default;
 
 	bool parse_config(const string &config_path);
 
+	bool save_config(const string &config_path) const;
+
 	void print_config(void) const;
+
+	void adjust_bbox(int delta);
 };
 
 
@@ -77,5 +83,7 @@ bool get_active_buble(vector<Rect> &buble_bboxes, Rect &buble_in, Rect &buble_ou
 string get_buble_name(BUBLE_TYPE bb_type);
 
 bool has_border(const Mat &h_img, const Mat &l_img, BubleConfig &buble_config);
+
+bool buble_detect_config(const Mat &image, BubleConfig &buble_config);
 
 #endif //AMDANCER_BUBLE_H

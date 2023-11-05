@@ -71,10 +71,10 @@ bool K4Config::parse_config(const string &config_path)
 					per_box = rect;
 				else
 					return false;
-			} else if (key == "WIDTH")
+			} else if (key == "width")
 			{
 				WIDTH = std::stoi(value);
-			} else if (key == "HEIGHT")
+			} else if (key == "height")
 			{
 				HEIGHT = std::stoi(value);
 			}

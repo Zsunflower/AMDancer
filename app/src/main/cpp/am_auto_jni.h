@@ -15,7 +15,8 @@
 #define  LOG_TAG    "AM_AUTO_JNI"
 #define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
 
-static bool is_init = false;
+static string config_path, buble_config_path, k4_config_path;
+static int DELTA = 3;
 static BubleConfig buble_config;
 static K4Config k4_config;
 static jmethodID click_id, hold_id, drag_id;
@@ -25,11 +26,12 @@ extern "C"
 {
 # endif
 
-JNIEXPORT jboolean
+JNIEXPORT void JNICALL
+Java_com_autogame_amdancer_MainActivity_setConfigPath(JNIEnv *env, jobject thiz,
+													  jstring config_path);
 
-JNICALL
-Java_com_autogame_amdancer_MainActivity_initConfig(JNIEnv *env, jobject obj,
-												   jstring config_path);
+JNIEXPORT jboolean JNICALL
+Java_com_autogame_amdancer_MainActivity_initConfig(JNIEnv *env, jobject obj);
 
 JNIEXPORT void JNICALL
 Java_com_autogame_amdancer_ScreenCaptureService_setupCB(JNIEnv
@@ -37,12 +39,8 @@ Java_com_autogame_amdancer_ScreenCaptureService_setupCB(JNIEnv
 														jobject obj
 );
 
-JNIEXPORT jboolean
-JNICALL
-Java_com_autogame_amdancer_MainActivity_init4kConfig(JNIEnv *env, jobject
-obj,
-													 jstring config_path
-);
+JNIEXPORT jboolean JNICALL
+Java_com_autogame_amdancer_MainActivity_init4kConfig(JNIEnv *env, jobject obj);
 
 JNIEXPORT void JNICALL
 Java_com_autogame_amdancer_ScreenCaptureService_processBB(JNIEnv

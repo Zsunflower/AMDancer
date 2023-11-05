@@ -11,66 +11,55 @@
         tools:ignore="UselessParent">
 
         <!-- this is the collapsed layout -->
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/layoutCollapsed"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:background="#1b1b1b"
+            android:orientation="horizontal"
             android:visibility="visible">
 
-            <ImageView
-                android:id="@+id/collapsed_iv"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_marginTop="8dp"
-                android:src="@drawable/icon_simplified_coding" />
+            <Button
+                android:id="@+id/expanded_btn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/baseline_arrow_forward_24" />
 
-            <ImageView
-                android:id="@+id/buttonClose"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:layout_marginStart="50dp"
-                android:src="@drawable/icon_close" />
-        </RelativeLayout>
+        </LinearLayout>
 
         <!-- this is the expanded layout -->
         <LinearLayout
             android:id="@+id/layoutExpanded"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="#a0c3d7"
+            android:background="#1b1b1b"
             android:orientation="horizontal"
-            android:padding="8dp"
-            android:visibility="gone">
+            android:visibility="gone"
+            android:weightSum="4">
 
-            <ImageView
-                android:id="@+id/buttonSimplifiedCodingExpanded"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:src="@drawable/icon_simplified_coding"
-                tools:ignore="ContentDescription" />
+            <Button
+                android:id="@+id/collapse_btn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/baseline_arrow_back_24" />
 
-            <LinearLayout
-                android:id="@+id/buttonSimplifiedCoding"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+            <Button
+                android:id="@+id/startButton_4k"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/baseline_compare_arrows_24" />
 
-                <Button
-                    android:id="@+id/startButton_4k"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/button_normal"
-                    android:text="@string/start_4k" />
+            <Button
+                android:id="@+id/startButton_BB"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/baseline_bubble_chart_24" />
 
-                <Button
-                    android:id="@+id/startButton_BB"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/button_normal"
-                    android:text="@string/start_bb" />
-            </LinearLayout>
-
+            <Button
+                android:id="@+id/buttonClose"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/baseline_close_24" />
         </LinearLayout>
     </RelativeLayout>
 

@@ -42,6 +42,12 @@ ARROW_TYPE_BB get_arrow_type(const Mat &thresholded, const Rect &rect)
 	rect_ext.y -= delta;
 	rect_ext.width += 2 * delta;
 	rect_ext.height += 2 * delta;
+
+	if (rect_ext.x + rect_ext.width > thresholded.cols ||
+		rect_ext.y + rect_ext.height > thresholded.rows || rect_ext.x < 0 || rect_ext.y < 0)
+	{
+		return ARROW_TYPE_BB::ARROW_UNK;
+	}
 	Mat buble_arrow_img = thresholded(rect_ext);
 	delta /= 2;
 	Mat eroded, kernel;
@@ -203,7 +209,7 @@ void find_bubles(const Mat &l_thresholded, vector<Rect> &buble_bboxes, int delta
 	for (int i = 0; i < contours.size(); ++i)
 	{
 		Rect r = boundingRect(contours[i]);
-		if ((abs(r.width - r.height) < delta_wh_threshold) && r.width > size_threshold)
+		if (abs(r.width - r.height) < delta_wh_threshold && r.width > size_threshold)
 		{
 			if (hierarchy[i][2] < 0)
 			{
@@ -275,6 +281,66 @@ bool has_border(const Mat &h_img, const Mat &l_img, BubleConfig &buble_config)
 	return false;
 }
 
+bool buble_detect_config(const Mat &image, BubleConfig &buble_config)
+{
+	Mat hls, l_mask, hls_mats[3];
+	cvtColor(image, hls, COLOR_BGR2HLS);
+	split(hls, hls_mats);
+	Rect roi(image.cols / 4, image.rows / 2, image.cols / 2, image.rows / 2);
+	inRange(hls_mats[1](roi), 245, 255, l_mask);
+	vector<vector<Point> > contours;
+	vector<Vec4i> hierarchy;
+	findContours(l_mask, contours, hierarchy, RETR_CCOMP, CHAIN_APPROX_SIMPLE);
+	vector<Rect> bboxes;
+	for (auto &ct: contours)
+	{
+		Rect r = boundingRect(ct);
+		if (r.width > 100 && roi.height - r.y - r.height < 0.5 * r.height &&
+			abs(r.x + r.width / 2 - roi.width / 2) < 20)
+			bboxes.push_back(r);
+	}
+	if (bboxes.size() == 2)
+	{
+		bboxes[0].x += roi.x;
+		bboxes[0].y += roi.y;
+		bboxes[1].x += roi.x;
+		bboxes[1].y += roi.y;
+		buble_config.WIDTH = image.cols;
+		buble_config.HEIGHT = image.rows;
+		if (bboxes[0].contains(bboxes[1].tl()) && bboxes[0].contains(bboxes[1].br()))
+		{
+			buble_config.SPACE_BUBLE_BBOX = bboxes[0];
+			buble_config.SPACE_BUBLE_BBOX_IN = bboxes[1];
+			buble_config.MIN_BUBLE_SIZE = 0.85 * bboxes[1].width;
+			buble_config.MAX_DELTA_BUBLE_WH = 5;
+			buble_config.NOISE_SIZE = 0.85 * bboxes[1].width;
+
+			buble_config.SPACE_BUBLE_BBOX_EXT = buble_config.SPACE_BUBLE_BBOX;
+			buble_config.SPACE_BUBLE_BBOX_EXT.x -= buble_config.SPACE_BUBLE_BBOX.width;
+			buble_config.SPACE_BUBLE_BBOX_EXT.y -= buble_config.SPACE_BUBLE_BBOX.width;
+			buble_config.SPACE_BUBLE_BBOX_EXT.width += 2 * buble_config.SPACE_BUBLE_BBOX.width;
+			buble_config.SPACE_BUBLE_BBOX_EXT.height += buble_config.SPACE_BUBLE_BBOX.width;
+			return true;
+		}
+		if (bboxes[1].contains(bboxes[0].tl()) && bboxes[1].contains(bboxes[0].br()))
+		{
+			buble_config.SPACE_BUBLE_BBOX = bboxes[1];
+			buble_config.SPACE_BUBLE_BBOX_IN = bboxes[0];
+			buble_config.MIN_BUBLE_SIZE = 0.85 * bboxes[0].width;
+			buble_config.MAX_DELTA_BUBLE_WH = 5;
+			buble_config.NOISE_SIZE = 0.85 * bboxes[0].width;
+
+			buble_config.SPACE_BUBLE_BBOX_EXT = buble_config.SPACE_BUBLE_BBOX;
+			buble_config.SPACE_BUBLE_BBOX_EXT.x -= buble_config.SPACE_BUBLE_BBOX.width;
+			buble_config.SPACE_BUBLE_BBOX_EXT.y -= buble_config.SPACE_BUBLE_BBOX.width;
+			buble_config.SPACE_BUBLE_BBOX_EXT.width += 2 * buble_config.SPACE_BUBLE_BBOX.width;
+			buble_config.SPACE_BUBLE_BBOX_EXT.height += buble_config.SPACE_BUBLE_BBOX.width;
+			return true;
+		}
+	}
+	return false;
+}
+
 bool BubleConfig::parse_config(const string &config_path)
 {
 	std::ifstream file(config_path);
@@ -306,6 +372,38 @@ bool BubleConfig::parse_config(const string &config_path)
 				SPACE_BUBLE_BBOX.y = std::stoi(tokens[1]);
 				SPACE_BUBLE_BBOX.width = std::stoi(tokens[2]);
 				SPACE_BUBLE_BBOX.height = std::stoi(tokens[3]);
+			} else if (key == "SPACE_BUBLE_BBOX_IN")
+			{
+				std::istringstream ss(value);
+				string token;
+				vector<string> tokens;
+
+				while (std::getline(ss, token, ','))
+				{
+					tokens.push_back(strip(token));
+				}
+				if (tokens.size() != 4)
+					return false;
+				SPACE_BUBLE_BBOX_IN.x = std::stoi(tokens[0]);
+				SPACE_BUBLE_BBOX_IN.y = std::stoi(tokens[1]);
+				SPACE_BUBLE_BBOX_IN.width = std::stoi(tokens[2]);
+				SPACE_BUBLE_BBOX_IN.height = std::stoi(tokens[3]);
+			} else if (key == "SPACE_BUBLE_BBOX_EXT")
+			{
+				std::istringstream ss(value);
+				string token;
+				vector<string> tokens;
+
+				while (std::getline(ss, token, ','))
+				{
+					tokens.push_back(strip(token));
+				}
+				if (tokens.size() != 4)
+					return false;
+				SPACE_BUBLE_BBOX_EXT.x = std::stoi(tokens[0]);
+				SPACE_BUBLE_BBOX_EXT.y = std::stoi(tokens[1]);
+				SPACE_BUBLE_BBOX_EXT.width = std::stoi(tokens[2]);
+				SPACE_BUBLE_BBOX_EXT.height = std::stoi(tokens[3]);
 			} else if (key == "DELTA")
 			{
 				DELTA = std::stoi(value);
@@ -327,19 +425,6 @@ bool BubleConfig::parse_config(const string &config_path)
 			}
 		}
 	}
-	SPACE_BUBLE_BBOX.x -= DELTA;
-	SPACE_BUBLE_BBOX.y -= DELTA;
-	SPACE_BUBLE_BBOX.width += 2 * DELTA;
-	SPACE_BUBLE_BBOX.height += 2 * DELTA;
-	SPACE_BUBLE_BBOX.height = min(SPACE_BUBLE_BBOX.height, HEIGHT - SPACE_BUBLE_BBOX.y);
-
-	SPACE_BUBLE_BBOX_EXT = SPACE_BUBLE_BBOX;
-	SPACE_BUBLE_BBOX_EXT.x -= SPACE_BUBLE_BBOX.width;
-	SPACE_BUBLE_BBOX_EXT.y -= SPACE_BUBLE_BBOX.width;
-	SPACE_BUBLE_BBOX_EXT.width += 2 * SPACE_BUBLE_BBOX.width;
-	SPACE_BUBLE_BBOX_EXT.height += 2 * SPACE_BUBLE_BBOX.width;
-	SPACE_BUBLE_BBOX_EXT.height = min(SPACE_BUBLE_BBOX_EXT.height, HEIGHT - SPACE_BUBLE_BBOX_EXT.y);
-
 	return true;
 }
 
@@ -348,10 +433,44 @@ void BubleConfig::print_config() const
 	LOGD("WIDTH x HEIGHT: (%d x %d)", WIDTH, HEIGHT);
 	LOGD("SPACE_BUBLE_BBOX: (%d, %d, %d, %d)", SPACE_BUBLE_BBOX.x, SPACE_BUBLE_BBOX.y,
 		 SPACE_BUBLE_BBOX.width, SPACE_BUBLE_BBOX.height);
+	LOGD("SPACE_BUBLE_BBOX_IN: (%d, %d, %d, %d)", SPACE_BUBLE_BBOX_IN.x, SPACE_BUBLE_BBOX_IN.y,
+		 SPACE_BUBLE_BBOX_IN.width, SPACE_BUBLE_BBOX_IN.height);
 	LOGD("DELTA: %d", DELTA);
 	LOGD("SPACE_BUBLE_BBOX_EXT: (%d, %d, %d, %d)", SPACE_BUBLE_BBOX_EXT.x, SPACE_BUBLE_BBOX_EXT.y,
 		 SPACE_BUBLE_BBOX_EXT.width, SPACE_BUBLE_BBOX_EXT.height);
 	LOGD("MIN_BUBLE_SIZE: %d", MIN_BUBLE_SIZE);
 	LOGD("MAX_DELTA_BUBLE_WH: %d", MAX_DELTA_BUBLE_WH);
 	LOGD("NOISE_SIZE: %d", NOISE_SIZE);
+}
+
+bool BubleConfig::save_config(const string &config_path) const
+{
+	std::ofstream file(config_path);
+	if (!file.is_open())
+		return false;
+	file << "SPACE_BUBLE_BBOX=" << SPACE_BUBLE_BBOX.x << "," << SPACE_BUBLE_BBOX.y << ","
+		 << SPACE_BUBLE_BBOX.width << "," << SPACE_BUBLE_BBOX.height << std::endl;
+	file << "SPACE_BUBLE_BBOX_IN=" << SPACE_BUBLE_BBOX_IN.x << "," << SPACE_BUBLE_BBOX_IN.y << ","
+		 << SPACE_BUBLE_BBOX_IN.width << "," << SPACE_BUBLE_BBOX_IN.height << std::endl;
+	file << "SPACE_BUBLE_BBOX_EXT=" << SPACE_BUBLE_BBOX_EXT.x << "," << SPACE_BUBLE_BBOX_EXT.y
+		 << ","
+		 << SPACE_BUBLE_BBOX_EXT.width << "," << SPACE_BUBLE_BBOX_EXT.height << std::endl;
+	file << "DELTA=" << DELTA << std::endl;
+	file << "WIDTH=" << WIDTH << std::endl;
+	file << "HEIGHT=" << HEIGHT << std::endl;
+	file << "MIN_BUBLE_SIZE=" << MIN_BUBLE_SIZE << std::endl;
+	file << "MAX_DELTA_BUBLE_WH=" << MAX_DELTA_BUBLE_WH << std::endl;
+	file << "NOISE_SIZE=" << NOISE_SIZE << std::endl;
+	file.close();
+	LOGD("Save buble config to: %s", config_path.c_str());
+	return true;
+}
+
+void BubleConfig::adjust_bbox(int delta)
+{
+	DELTA = delta;
+	SPACE_BUBLE_BBOX.x -= DELTA;
+	SPACE_BUBLE_BBOX.y -= DELTA;
+	SPACE_BUBLE_BBOX.width += 2 * DELTA;
+	SPACE_BUBLE_BBOX.height += DELTA;
 }

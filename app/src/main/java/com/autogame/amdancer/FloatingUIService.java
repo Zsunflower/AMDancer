@@ -5,7 +5,10 @@ import android.app.Activity;
 import android.app.Service;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -55,11 +58,12 @@ public class FloatingUIService extends Service implements View.OnClickListener {
         expandedView = mFloatingView.findViewById(R.id.layoutExpanded);
 
         //adding click listener to close button and expanded view
-        mFloatingView.findViewById(R.id.buttonClose).setOnClickListener(this);
-        expandedView.setOnClickListener(this);
+        mFloatingView.findViewById(R.id.expanded_btn).setOnClickListener(this);
 
+        mFloatingView.findViewById(R.id.collapse_btn).setOnClickListener(this);
         mFloatingView.findViewById(R.id.startButton_4k).setOnClickListener(this);
         mFloatingView.findViewById(R.id.startButton_BB).setOnClickListener(this);
+        mFloatingView.findViewById(R.id.buttonClose).setOnClickListener(this);
         //adding an touchlistener to make drag movement of the floating widget
         mFloatingView.findViewById(R.id.relativeLayoutParent).setOnTouchListener(new View.OnTouchListener() {
             @SuppressLint("ClickableViewAccessibility")
@@ -71,8 +75,6 @@ public class FloatingUIService extends Service implements View.OnClickListener {
 
                     case MotionEvent.ACTION_UP:
                         //when the drag is ended switching the state of the widget
-                        collapsedView.setVisibility(View.GONE);
-                        expandedView.setVisibility(View.VISIBLE);
                         return true;
 
                     case MotionEvent.ACTION_MOVE:
@@ -109,9 +111,12 @@ public class FloatingUIService extends Service implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         int id = v.getId();
-        if (id == R.id.layoutExpanded) {//switching views
+        if (id == R.id.collapse_btn) {//switching views
             collapsedView.setVisibility(View.VISIBLE);
             expandedView.setVisibility(View.GONE);
+        } else if (id == R.id.expanded_btn) {
+            collapsedView.setVisibility(View.GONE);
+            expandedView.setVisibility(View.VISIBLE);
         } else if (id == R.id.buttonClose) {//closing the widget
             stopProjection();
             stopSelf();
@@ -119,22 +124,24 @@ public class FloatingUIService extends Service implements View.OnClickListener {
             if (ScreenCaptureService.PLAY_MODE != ScreenCaptureService.FK_MODE) {
                 ScreenCaptureService.PLAY_MODE = ScreenCaptureService.FK_MODE;
                 startProjection();
-                mFloatingView.findViewById(R.id.startButton_BB).setBackgroundResource(R.drawable.button_normal);
-                mFloatingView.findViewById(R.id.startButton_4k).setBackgroundResource(R.drawable.button_selected);
+                PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP);
+                mFloatingView.findViewById(R.id.startButton_4k).getBackground().setColorFilter(colorFilter);
+                mFloatingView.findViewById(R.id.startButton_BB).getBackground().clearColorFilter();
             } else {
                 stopProjection();
-                mFloatingView.findViewById(R.id.startButton_4k).setBackgroundResource(R.drawable.button_normal);
+                mFloatingView.findViewById(R.id.startButton_4k).getBackground().clearColorFilter();
                 ScreenCaptureService.PLAY_MODE = ScreenCaptureService.UNK_MODE;
             }
         } else if (id == R.id.startButton_BB) {
             if (ScreenCaptureService.PLAY_MODE != ScreenCaptureService.BB_MODE) {
                 ScreenCaptureService.PLAY_MODE = ScreenCaptureService.BB_MODE;
                 startProjection();
-                mFloatingView.findViewById(R.id.startButton_4k).setBackgroundResource(R.drawable.button_normal);
-                mFloatingView.findViewById(R.id.startButton_BB).setBackgroundResource(R.drawable.button_selected);
+                PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP); //DST_ATOP
+                mFloatingView.findViewById(R.id.startButton_BB).getBackground().setColorFilter(colorFilter);
+                mFloatingView.findViewById(R.id.startButton_4k).getBackground().clearColorFilter();
             } else {
                 stopProjection();
-                mFloatingView.findViewById(R.id.startButton_BB).setBackgroundResource(R.drawable.button_normal);
+                mFloatingView.findViewById(R.id.startButton_BB).getBackground().clearColorFilter();
                 ScreenCaptureService.PLAY_MODE = ScreenCaptureService.UNK_MODE;
             }
         }

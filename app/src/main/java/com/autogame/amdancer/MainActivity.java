@@ -1,27 +1,33 @@
 package com.autogame.amdancer;
 
-import android.accessibilityservice.AccessibilityServiceInfo;
+import static java.lang.Integer.max;
+import static java.lang.Integer.min;
+
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ServiceInfo;
+import android.content.res.AssetManager;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
 
 import java.io.File;
-import java.util.List;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.util.Objects;
 
 
 public class MainActivity extends Activity {
     private static final int REQUEST_CODE = 100;
-    private static final int SYSTEM_ALERT_WINDOW_PERMISSION = 2084;
     private static final String TAG = "AM Dancer";
 
     // Used to load the 'amdancer' library on application startup.
@@ -32,6 +38,28 @@ public class MainActivity extends Activity {
     private int cap_result_code = -1;
     private Intent cap_intent = null;
 
+    // Check if the Accessibility Service is enabled
+    public static boolean isAccessibilityServiceEnabled(Context context, Class<?> accessibilityService) {
+        ComponentName expectedComponentName = new ComponentName(context, accessibilityService);
+
+        String enabledServicesSetting = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+        if (enabledServicesSetting == null)
+            return false;
+
+        TextUtils.SimpleStringSplitter colonSplitter = new TextUtils.SimpleStringSplitter(':');
+        colonSplitter.setString(enabledServicesSetting);
+
+        while (colonSplitter.hasNext()) {
+            String componentNameString = colonSplitter.next();
+            ComponentName enabledService = ComponentName.unflattenFromString(componentNameString);
+
+            if (enabledService != null && enabledService.equals(expectedComponentName))
+                return true;
+        }
+
+        return false;
+    }
+
     /****************************************** Activity Lifecycle methods ************************/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,22 +67,21 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         Button showWidget = findViewById(R.id.startButton);
-        showWidget.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (Settings.canDrawOverlays(MainActivity.this)) {
-                    Intent float_ui_intent = new Intent(MainActivity.this, FloatingUIService.class);
-                    float_ui_intent.putExtra("RESULT_CODE", cap_result_code);
-                    float_ui_intent.putExtra("DATA", cap_intent);
-                    startService(float_ui_intent);
-                    finish();
-                } else {
-                    askPermission();
-                    Log.e(TAG, "You need System Alert Window Permission to do this");
-                }
+        showWidget.setOnClickListener(view -> {
+            if (cap_intent == null) {
+                requireCapturePermission();
+                return;
+            }
+            if (checkForOverlayPermission() && checkForAccessibilityPermission() && checkForAccessibilityConnected()) {
+                Intent float_ui_intent = new Intent(MainActivity.this, FloatingUIService.class);
+                float_ui_intent.putExtra("RESULT_CODE", cap_result_code);
+                float_ui_intent.putExtra("DATA", cap_intent);
+                startService(float_ui_intent);
+                finish();
             }
         });
 
+        requireCapturePermission();
         File externalFilesDir = getExternalFilesDir(null);
         if (externalFilesDir != null) {
             String configDir = externalFilesDir.getAbsolutePath() + "/configs/";
@@ -65,66 +92,122 @@ public class MainActivity extends Activity {
                     Log.e(TAG, "Failed to create configs directory.");
                 }
             }
-            File buble_config_file = new File(configDir + "buble_config.ini");
-            if (!buble_config_file.exists()) {
-                Log.e(TAG, "Buble config file not found!");
-            } else {
-                Log.e(TAG, "Buble config file: " + buble_config_file.getAbsolutePath());
-                boolean status = initConfig(buble_config_file.getAbsolutePath());
-                if (status)
-                    Log.e(TAG, "Buble config file parse success!");
-                else
-                    Log.e(TAG, "Buble config file parse failed!");
-            }
+            extract_configs(configDir);
+            setConfigPath(configDir);
+            initConfig();
+            init4kConfig();
+        }
+    }
 
-            File buble_4k_config_file = new File(configDir + "buble_config_4k.ini");
-            if (!buble_4k_config_file.exists()) {
-                Log.e(TAG, "Buble 4k config file not found!");
-            } else {
-                Log.e(TAG, "Buble 4k config file: " + buble_4k_config_file.getAbsolutePath());
-                boolean status = init4kConfig(buble_4k_config_file.getAbsolutePath());
-                if (status)
-                    Log.e(TAG, "Buble config 4k file parse success!");
-                else
-                    Log.e(TAG, "Buble config 4k file parse failed!");
+    private void extract_configs(String outDir) {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int height = displayMetrics.heightPixels;
+        int width = displayMetrics.widthPixels;
+        String config_filename = max(width, height) + "x" + min(width, height) + ".ini";
+
+        AssetManager assetManager = getAssets();
+        String[] files;
+        try {
+            files = assetManager.list("");
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to extract asset config files.", e);
+            return;
+        }
+        for (String filename : files) {
+            if (Objects.equals(filename, config_filename)) {
+                Log.e(TAG, "Copy config: " + filename);
+                InputStream in;
+                OutputStream out;
+                try {
+                    in = assetManager.open(filename);
+                    File outFile = new File(outDir, "buble_config_4k.ini");
+                    out = Files.newOutputStream(outFile.toPath());
+                    copyFile(in, out);
+                    Log.e(TAG, "Copy success");
+                } catch (IOException e) {
+                    Log.e(TAG, "Copy failed", e);
+                }
+                return;
             }
         }
-        if (!isAccessibilityServiceEnabled())
-            requestAccessibilityService();
+        Log.e(TAG, "This device don't support 4k mode");
+    }
 
+    private void copyFile(InputStream in, OutputStream out) throws IOException {
+        byte[] buffer = new byte[1024];
+        int read;
+        while ((read = in.read(buffer)) != -1) {
+            out.write(buffer, 0, read);
+        }
+        in.close();
+        out.flush();
+        out.close();
+    }
+
+    private boolean checkForAccessibilityConnected() {
+        if (BotAccessibilityService.getInstance() == null) {
+            Log.d(TAG, "BotAccessibilityService is not connected!.");
+
+            AlertDialog.Builder alert = new AlertDialog.Builder(this);
+            alert.setTitle("Accessibility Service");
+            alert.setMessage("Accessibility Service is not connected!");
+            alert.setPositiveButton("OK", null);
+            alert.show();
+            return false;
+        }
+        return true;
+    }
+
+    private boolean checkForOverlayPermission() {
         if (!Settings.canDrawOverlays(this)) {
-            askPermission();
+            Log.d(TAG, "Application is missing overlay permission.");
+
+            AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
+            builder1.setMessage("Enable display over the other apss.");
+            builder1.setPositiveButton(
+                    "Yes",
+                    (dialog, id) -> {
+                        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                Uri.parse("package:" + getPackageName()));
+                        startActivity(intent);
+                    });
+
+            builder1.setNegativeButton(
+                    "No",
+                    (dialog, id) -> dialog.cancel());
+
+            AlertDialog alert11 = builder1.create();
+            alert11.show();
+            return false;
         }
-        requireCapturePermission();
-        Log.e(TAG, "request result: " + isAccessibilityServiceEnabled());
+        Log.d(TAG, "Application has permission to draw overlay.");
+        return true;
     }
 
-    private void askPermission() {
-        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                Uri.parse("package:" + getPackageName()));
-        startActivityForResult(intent, SYSTEM_ALERT_WINDOW_PERMISSION);
-    }
+    private boolean checkForAccessibilityPermission() {
+        if (isAccessibilityServiceEnabled(getApplicationContext(), BotAccessibilityService.class))
+            return true;
+        Log.d(TAG, "Application is missing Accessibility Service permission.");
+        // Request the user to enable the Accessibility Service
 
+        AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
+        builder1.setMessage("Enable Accessibility Service to allow this app perform input touch, gesture.");
+        builder1.setPositiveButton(
+                "Yes",
+                (dialog, id) -> {
+                    Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+                    startActivity(intent);
+                });
 
-    // Check if the Accessibility Service is enabled
-    public boolean isAccessibilityServiceEnabled() {
-        AccessibilityManager am = (AccessibilityManager) this.getSystemService(Context.ACCESSIBILITY_SERVICE);
-        List<AccessibilityServiceInfo> enabledServices = am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_GENERIC);
-        for (AccessibilityServiceInfo enabledService : enabledServices) {
-            ServiceInfo enabledServiceInfo = enabledService.getResolveInfo().serviceInfo;
-            if (enabledServiceInfo.packageName.equals(this.getPackageName()) && enabledServiceInfo.name.equals(BotAccessibilityService.class.getName()))
-                return true;
-        }
+        builder1.setNegativeButton(
+                "No",
+                (dialog, id) -> dialog.cancel());
+
+        AlertDialog alert11 = builder1.create();
+        alert11.show();
         return false;
     }
-
-    // Request the user to enable the Accessibility Service
-    public void requestAccessibilityService() {
-        Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivityForResult(intent, 0);
-    }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -144,7 +227,9 @@ public class MainActivity extends Activity {
         startActivityForResult(mProjectionManager.createScreenCaptureIntent(), REQUEST_CODE);
     }
 
-    public native boolean initConfig(String config_path);
+    public native void setConfigPath(String config_path);
 
-    public native boolean init4kConfig(String config_path);
+    public native boolean initConfig();
+
+    public native boolean init4kConfig();
 }

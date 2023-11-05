@@ -7,7 +7,7 @@ import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 
 public class BotAccessibilityService extends AccessibilityService {
-    private static final String TAG = "ScreenCaptureActivity";
+    private static final String TAG = "BotAccessibilityService";
     private static BotAccessibilityService mInstance = null;
 
     public static BotAccessibilityService getInstance() {
@@ -37,7 +37,7 @@ public class BotAccessibilityService extends AccessibilityService {
         path.moveTo(x, y);
 
         GestureDescription.Builder builder = new GestureDescription.Builder();
-        builder.addStroke(new GestureDescription.StrokeDescription(path, 0, 10));
+        builder.addStroke(new GestureDescription.StrokeDescription(path, 0, 2));
 
         GestureDescription gestureDescription = builder.build();
 
@@ -50,7 +50,7 @@ public class BotAccessibilityService extends AccessibilityService {
         path.moveTo(x, y);
 
         GestureDescription.Builder builder = new GestureDescription.Builder();
-        builder.addStroke(new GestureDescription.StrokeDescription(path, 0, 500));
+        builder.addStroke(new GestureDescription.StrokeDescription(path, 0, 400));
 
         GestureDescription gestureDescription = builder.build();
         dispatchGesture(gestureDescription, null, null);
@@ -63,7 +63,7 @@ public class BotAccessibilityService extends AccessibilityService {
         path.lineTo(x2, y2);
 
         GestureDescription.Builder gestureBuilder = new GestureDescription.Builder();
-        gestureBuilder.addStroke(new GestureDescription.StrokeDescription(path, 0, 400)); // Adjust duration as needed
+        gestureBuilder.addStroke(new GestureDescription.StrokeDescription(path, 0, 200)); // Adjust duration as needed
         GestureDescription gestureDescription = gestureBuilder.build();
         // Dispatch the swipe gesture asynchronously
         dispatchGesture(gestureDescription, null, null);

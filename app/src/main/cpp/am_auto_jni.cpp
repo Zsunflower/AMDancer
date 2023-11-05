@@ -5,75 +5,58 @@
 using namespace cv;
 
 
-extern "C" JNIEXPORT jboolean
-JNICALL
-Java_com_autogame_amdancer_MainActivity_initConfig(JNIEnv *env, jobject
-obj,
-												   jstring config_path
-)
+extern "C" JNIEXPORT void JNICALL
+Java_com_autogame_amdancer_MainActivity_setConfigPath(JNIEnv *env, jobject thiz,
+													  jstring jconfig_path)
 {
 	const char *_config_path;
-	_config_path = env->GetStringUTFChars(config_path, nullptr);
-	LOGD("Parse buble config file: %s", _config_path);
-	is_init = buble_config.parse_config(_config_path);
-	env->
-			ReleaseStringUTFChars(config_path, _config_path
-	);
+	_config_path = env->GetStringUTFChars(jconfig_path, nullptr);
+	config_path = _config_path;
+	env->ReleaseStringUTFChars(jconfig_path, _config_path);
+	buble_config_path = config_path + "/" + "buble_config.ini";
+	k4_config_path = config_path + "/" + "buble_config_4k.ini";
+	LOGD("Config dir: %s", config_path.c_str());
+	LOGD("Buble config path: %s", buble_config_path.c_str());
+	LOGD("4K config path: %s", k4_config_path.c_str());
+}
 
-	if (is_init)
+extern "C" JNIEXPORT jboolean
+JNICALL
+Java_com_autogame_amdancer_MainActivity_initConfig(JNIEnv *env, jobject obj)
+{
+	buble_config.is_init = buble_config.parse_config(buble_config_path);
+	if (buble_config.is_init)
 	{
 		LOGD("Parse buble config success!");
-		buble_config.
-
-				print_config();
-
-		return
-				JNI_TRUE;
+		buble_config.print_config();
+		buble_config.adjust_bbox(buble_config.DELTA);
+		return JNI_TRUE;
 	} else
 	{
 		LOGD("Parse buble config failed!");
-		return
-				JNI_FALSE;
+		return JNI_FALSE;
 	}
 }
 
 extern "C" JNIEXPORT jboolean
 JNICALL
-Java_com_autogame_amdancer_MainActivity_init4kConfig(JNIEnv *env, jobject
-obj,
-													 jstring config_path
-)
+Java_com_autogame_amdancer_MainActivity_init4kConfig(JNIEnv *env, jobject obj)
 {
-	const char *_config_path;
-	_config_path = env->GetStringUTFChars(config_path, nullptr);
-	LOGD("Parse buble 4k config file: %s", _config_path);
-	is_init = k4_config.parse_config(_config_path);
-	env->
-			ReleaseStringUTFChars(config_path, _config_path
-	);
-
-	if (is_init)
+	k4_config.is_init = k4_config.parse_config(k4_config_path);
+	if (k4_config.is_init)
 	{
 		LOGD("Parse 4K config success!");
-		k4_config.
-
-				print_config();
-
-		return
-				JNI_TRUE;
+		k4_config.print_config();
+		return JNI_TRUE;
 	} else
 	{
 		LOGD("Parse 4K config failed!");
-		return
-				JNI_FALSE;
+		return JNI_FALSE;
 	}
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_autogame_amdancer_ScreenCaptureService_setupCB(JNIEnv
-														*env,
-														jobject obj
-)
+Java_com_autogame_amdancer_ScreenCaptureService_setupCB(JNIEnv *env, jobject obj)
 {
 	jclass thiz = env->GetObjectClass(obj);
 	click_id = env->GetMethodID(thiz, "click", "(II)V");
@@ -97,7 +80,28 @@ Java_com_autogame_amdancer_ScreenCaptureService_processBB(
 	Mat bgr_image;
 	cvtColor(ori_image, bgr_image, COLOR_RGBA2BGR
 	);
-
+	if (!buble_config.is_init)
+	{
+		bool has_config = buble_detect_config(bgr_image, buble_config);
+		if (has_config)
+		{
+			Mat image = bgr_image.clone();
+			buble_config.is_init = true;
+			LOGD("Detect buble config:");
+			buble_config.DELTA = DELTA;
+			buble_config.print_config();
+			buble_config.save_config(buble_config_path);
+			buble_config.adjust_bbox(DELTA);
+			rectangle(image, buble_config.SPACE_BUBLE_BBOX, Scalar(0, 255, 0), 2);
+			rectangle(image, buble_config.SPACE_BUBLE_BBOX_IN, Scalar(0, 0, 255), 2);
+			rectangle(image, buble_config.SPACE_BUBLE_BBOX_EXT, Scalar(255, 0, 255), 2);
+			imwrite(config_path + "/" + "buble_config.jpg", image);
+		} else
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+			return;
+		}
+	}
 	bool has_active;
 	static int pressing = false;
 	Mat hls, l_thresholded;
@@ -110,31 +114,25 @@ Java_com_autogame_amdancer_ScreenCaptureService_processBB(
 	);
 	threshold(hls_mats[1], l_thresholded,
 			  200, 255, THRESH_BINARY);
-	find_bubles(l_thresholded, buble_bboxes, buble_config
-						.MAX_DELTA_BUBLE_WH,
+	find_bubles(l_thresholded, buble_bboxes, buble_config.MAX_DELTA_BUBLE_WH,
 				buble_config.MIN_BUBLE_SIZE, buble_config.NOISE_SIZE);
 	has_active = get_active_buble(buble_bboxes, buble_in, buble_out);
+//	static int i = 0; //todo
+
 	if (has_active)
 	{
 		pressing = true;
 		BUBLE_TYPE buble_type = get_buble_type(hls_mats[0], buble_in);
 		if (buble_type == BUBLE_TYPE::PURPLE)
 		{
-			env->
-					CallVoidMethod(obj, click_id, buble_in
-														  .x + buble_in.width / 2,
-								   buble_in.y + buble_in.height / 2);
-			LOGD("Click: (%d, %d)", buble_in.x + buble_in.width / 2,
-				 buble_in.y + buble_in.height / 2);
+			env->CallVoidMethod(obj, click_id, buble_in.x + buble_in.width / 2,
+								buble_in.y + buble_in.height / 2);
+
 		} else if (buble_type == BUBLE_TYPE::HOLD)
 		{
-			env->
-					CallVoidMethod(obj, hold_id, buble_in
-														 .x + buble_in.width / 2,
-								   buble_in.y + buble_in.height / 2);
-			LOGD("Hold: (%d, %d)", buble_in.x + buble_in.width / 2,
-				 buble_in.y + buble_in.height / 2);
-			std::this_thread::sleep_for(std::chrono::milliseconds(500)
+			env->CallVoidMethod(obj, hold_id, buble_in.x + buble_in.width / 2,
+								buble_in.y + buble_in.height / 2);
+			std::this_thread::sleep_for(std::chrono::milliseconds(300)
 			);
 		} else if (buble_type == BUBLE_TYPE::YELLOW || buble_type == BUBLE_TYPE::BLUE)
 		{
@@ -179,58 +177,32 @@ Java_com_autogame_amdancer_ScreenCaptureService_processBB(
 				x_end = x_start;
 				y_end = y_start;
 			}
-			env->
-					CallVoidMethod(obj, drag_id, x_start, y_start, x_end, y_end
+			env->CallVoidMethod(obj, drag_id, x_start, y_start, x_end, y_end
 			);
-			LOGD("Drag from (%d, %d) to (%d, %d)", x_start, y_start, x_end, y_end);
-			std::this_thread::sleep_for(std::chrono::milliseconds(400)
+//			rectangle(bgr_image, buble_in, Scalar(0, 255, 0), 2);
+//			rectangle(bgr_image, buble_out, Scalar(0, 0, 255), 2);
+//			putText(bgr_image, std::to_string(arrow_type), buble_out.tl(), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 255, 0));
+//			imwrite(config_path + "/img_" + std::to_string(i) + ".jpg", bgr_image);
+//			i += 1;
+			std::this_thread::sleep_for(std::chrono::milliseconds(100)
 			);
 		}
+//		imwrite(config_path + "/img_" + std::to_string(i) + ".jpg", bgr_image);
+//		i += 1;
 	}
-	if (buble_bboxes.
-
-			size()
-
-		<= 1 && pressing)
+	if (buble_bboxes.size() <= 1 && pressing)
 	{
-		if ((buble_bboxes.
-
-				size()
-
-			 == 1 &&
-			 (buble_config.SPACE_BUBLE_BBOX.
-					 contains(buble_bboxes[0]
-									  .
-
-											  tl()
-
-			 ) &&
-			  buble_config.SPACE_BUBLE_BBOX.
-					  contains(buble_bboxes[0]
-									   .
-
-											   br()
-
-			  ))) ||
-			buble_bboxes.
-
-					empty()
-
-				)
+		if ((buble_bboxes.size() == 1 &&
+			 (buble_config.SPACE_BUBLE_BBOX.contains(buble_bboxes[0].tl()) &&
+			  buble_config.SPACE_BUBLE_BBOX.contains(buble_bboxes[0].br()))) ||
+			buble_bboxes.empty())
 		{
-			if (!
-					has_border(hls_mats[0], hls_mats[1], buble_config
-					))
+			if (!has_border(hls_mats[0], hls_mats[1], buble_config))
 			{
-				env->
-						CallVoidMethod(obj, click_id, buble_config
-															  .SPACE_BUBLE_BBOX.x +
-													  buble_config.SPACE_BUBLE_BBOX.width / 2,
-									   buble_config.SPACE_BUBLE_BBOX.y +
-									   buble_config.SPACE_BUBLE_BBOX.height / 2);
-				LOGD("Click space: (%d, %d)",
-					 buble_config.SPACE_BUBLE_BBOX.x + buble_config.SPACE_BUBLE_BBOX.width / 2,
-					 buble_config.SPACE_BUBLE_BBOX.y + buble_config.SPACE_BUBLE_BBOX.height / 2);
+				env->CallVoidMethod(obj, click_id, buble_config.SPACE_BUBLE_BBOX.x +
+												   buble_config.SPACE_BUBLE_BBOX.width / 2,
+									buble_config.SPACE_BUBLE_BBOX.y +
+									buble_config.SPACE_BUBLE_BBOX.height / 2);
 				pressing = false;
 			}
 		}
@@ -253,7 +225,11 @@ Java_com_autogame_amdancer_ScreenCaptureService_process4k(
 	Mat bgr_image;
 	cvtColor(ori_image, bgr_image, COLOR_RGBA2BGR
 	);
-
+	if (bgr_image.cols != k4_config.WIDTH || bgr_image.rows != k4_config.HEIGHT)
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		return;
+	}
 	static int pressing = false;
 	static int last_x = 0;
 
@@ -292,8 +268,8 @@ Java_com_autogame_amdancer_ScreenCaptureService_process4k(
 				CallVoidMethod(obj, click_id, key_xy
 													  .x + key_xy.width / 2,
 							   key_xy.y + key_xy.height / 2);
-		LOGD("Click: (%d, %d)", key_xy.x + key_xy.width / 2,
-			 key_xy.y + key_xy.height / 2);
+//		LOGD("Click: (%d, %d)", key_xy.x + key_xy.width / 2,
+//			 key_xy.y + key_xy.height / 2);
 		std::this_thread::sleep_for(std::chrono::milliseconds(20)
 		);
 	} else if (pressing)
@@ -358,8 +334,8 @@ Java_com_autogame_amdancer_ScreenCaptureService_process4k(
 									   k4_config
 											   .space_key.x + k4_config.space_key.width / 2,
 									   k4_config.space_key.y + k4_config.space_key.height / 2);
-				LOGD("Click: (%d, %d)", k4_config.space_key.x + k4_config.space_key.width / 2,
-					 k4_config.space_key.y + k4_config.space_key.height / 2);
+//				LOGD("Click: (%d, %d)", k4_config.space_key.x + k4_config.space_key.width / 2,
+//					 k4_config.space_key.y + k4_config.space_key.height / 2);
 				pressing = false;
 				last_x = 0;
 			}

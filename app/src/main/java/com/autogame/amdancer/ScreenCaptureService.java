@@ -40,10 +40,8 @@ public class ScreenCaptureService extends Service {
     private static final String STOP = "STOP";
     private static final String SCREENCAP_NAME = "screencap";
     public static int PLAY_MODE = UNK_MODE;
-    private static int IMAGES_PRODUCED;
     BotAccessibilityService auto_accessibility_service = null;
     private MediaProjection mMediaProjection;
-    private String mStoreDir;
     private ImageReader mImageReader;
     private Handler mHandler;
     private Display mDisplay;
@@ -93,7 +91,7 @@ public class ScreenCaptureService extends Service {
         // create store dir
         File externalFilesDir = getExternalFilesDir(null);
         if (externalFilesDir != null) {
-            mStoreDir = externalFilesDir.getAbsolutePath() + "/screenshots/";
+            String mStoreDir = externalFilesDir.getAbsolutePath() + "/screenshots/";
             Log.e(TAG, "Save screenshots to: " + mStoreDir);
             File storeDirectory = new File(mStoreDir);
             if (!storeDirectory.exists()) {
@@ -119,10 +117,6 @@ public class ScreenCaptureService extends Service {
         }.start();
 
         auto_accessibility_service = BotAccessibilityService.getInstance();
-        if (auto_accessibility_service != null)
-            Log.e(TAG, "auto_accessibility_service inited");
-        else
-            Log.e(TAG, "auto_accessibility_service uninited");
         setupCB();
     }
 
@@ -227,11 +221,12 @@ public class ScreenCaptureService extends Service {
                     int rowStride = planes[0].getRowStride();
                     int rowPadding = rowStride - pixelStride * mWidth;
                     if (PLAY_MODE == BB_MODE) {
-                        processBB(mWidth + rowPadding / pixelStride, mHeight, buffer);
-                    } else {
-                        process4k(mWidth + rowPadding / pixelStride, mHeight, buffer);
+//                        processBB(mWidth + rowPadding / pixelStride, mHeight, buffer);
+                        Thread.sleep(10);
+                    } else if (PLAY_MODE == FK_MODE) {
+//                        process4k(mWidth + rowPadding / pixelStride, mHeight, buffer);
+                        Thread.sleep(10);
                     }
-                    IMAGES_PRODUCED++;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
