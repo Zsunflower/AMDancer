@@ -34,6 +34,8 @@
             android:layout_height="wrap_content"
             android:background="#1b1b1b"
             android:orientation="horizontal"
+            android:divider="@drawable/divider"
+            android:showDividers="middle"
             android:visibility="gone"
             android:weightSum="4">
 
@@ -47,7 +49,7 @@
                 android:id="@+id/startButton_4k"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:background="@drawable/baseline_compare_arrows_24" />
+                android:background="@drawable/k4" />
 
             <Button
                 android:id="@+id/startButton_BB"

@@ -67,13 +67,14 @@ public class MainActivity extends Activity {
 
         Button showWidget = findViewById(R.id.startButton);
         showWidget.setOnClickListener(view -> {
-            if (!is_screencapture_service_started) {
-                startProjection();
-                return;
-            }
             if (checkForOverlayPermission() && checkForAccessibilityPermission() && checkForAccessibilityConnected()) {
+                if (!is_screencapture_service_started) {
+                    startProjection();
+                    return;
+                }
                 Intent float_ui_intent = new Intent(MainActivity.this, FloatingUIService.class);
                 startService(float_ui_intent);
+                moveTaskToBack(false);
             }
         });
 

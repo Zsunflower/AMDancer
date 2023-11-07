@@ -116,7 +116,7 @@ public class FloatingUIService extends Service implements View.OnClickListener {
         } else if (id == R.id.startButton_4k) {
             if (ScreenCaptureService.PLAY_MODE != ScreenCaptureService.FK_MODE) {
                 ScreenCaptureService.PLAY_MODE = ScreenCaptureService.FK_MODE;
-                PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP);
+                PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(Color.GREEN, PorterDuff.Mode.DST_ATOP);
                 mFloatingView.findViewById(R.id.startButton_4k).getBackground().setColorFilter(colorFilter);
                 mFloatingView.findViewById(R.id.startButton_BB).getBackground().clearColorFilter();
             } else {
@@ -126,7 +126,7 @@ public class FloatingUIService extends Service implements View.OnClickListener {
         } else if (id == R.id.startButton_BB) {
             if (ScreenCaptureService.PLAY_MODE != ScreenCaptureService.BB_MODE) {
                 ScreenCaptureService.PLAY_MODE = ScreenCaptureService.BB_MODE;
-                PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP); //DST_ATOP
+                PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(Color.GREEN, PorterDuff.Mode.DST_ATOP); //DST_ATOP
                 mFloatingView.findViewById(R.id.startButton_BB).getBackground().setColorFilter(colorFilter);
                 mFloatingView.findViewById(R.id.startButton_4k).getBackground().clearColorFilter();
             } else {
