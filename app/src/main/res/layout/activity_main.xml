@@ -13,7 +13,7 @@
         android:textSize="20sp"
         android:layout_above="@+id/startButton"
         android:layout_centerHorizontal="true"
-        android:paddingBottom="40dp"
+        android:layout_marginBottom="60dp"
         />
     <Button
         android:id="@+id/startButton"
@@ -26,4 +26,27 @@
         android:textSize="25sp"
         android:textColor="#FFFFFF"/>
 
+    <Button
+        android:id="@+id/earnCredit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/startButton"
+        android:text="@string/earn_credit"
+        android:textColor="#FFFFFF"
+        android:layout_marginTop="30dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:background="@drawable/round_corner"/>
+
+    <com.google.android.gms.ads.AdView
+        xmlns:ads="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/adView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        ads:adSize="BANNER"
+        ads:adUnitId="ca-app-pub-5118564015725949/8051013310">
+    </com.google.android.gms.ads.AdView>
 </RelativeLayout>
