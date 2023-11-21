@@ -1,8 +1,5 @@
 package com.autogame.amdancer;
 
-import static java.lang.Integer.max;
-import static java.lang.Integer.min;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
@@ -13,9 +10,7 @@ import android.content.res.AssetManager;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
@@ -44,7 +39,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 public class MainActivity extends Activity {
     private static final int REQUEST_CODE = 100;
@@ -65,7 +59,7 @@ public class MainActivity extends Activity {
     public static boolean isAccessibilityServiceEnabled(Context context, Class<?> accessibilityService) {
         ComponentName expectedComponentName = new ComponentName(context, accessibilityService);
 
-        String enabledServicesSetting = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+        String enabledServicesSetting = android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
         if (enabledServicesSetting == null)
             return false;
 
@@ -296,41 +290,18 @@ public class MainActivity extends Activity {
     }
 
     private void extract_configs(String outDir) {
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int height = displayMetrics.heightPixels;
-        int width = displayMetrics.widthPixels;
-        String config_filename = max(width, height) + "x" + min(width, height) + ".ini";
-
         AssetManager assetManager = getAssets();
-        String[] files;
+        InputStream in;
+        FileOutputStream out;
         try {
-            files = assetManager.list("");
+            in = assetManager.open("4k_config.ini");
+            File outFile = new File(outDir, "4k_config.ini");
+            out = new FileOutputStream(outFile);
+            copyFile(in, out);
+            Log.e(TAG, "Copy 4k_config success");
         } catch (IOException e) {
-            Log.e(TAG, "Failed to extract asset config files.", e);
-            return;
+            Log.e(TAG, "Copy 4k_config failed", e);
         }
-        if (files != null) {
-            for (String filename : files) {
-                if (Objects.equals(filename, config_filename)) {
-                    Log.e(TAG, "Copy config: " + filename);
-                    InputStream in;
-                    OutputStream out;
-                    try {
-                        in = assetManager.open(filename);
-                        File outFile = new File(outDir, "buble_config_4k.ini");
-                        out = new FileOutputStream(outFile);
-                        copyFile(in, out);
-                        Log.e(TAG, "Copy success");
-                    } catch (IOException e) {
-                        Log.e(TAG, "Copy failed", e);
-                    }
-                    return;
-                }
-            }
-        }
-        Log.e(TAG, "This device does not yet support 4K mode.");
-        Toast.makeText(this, "This device does not yet support 4K mode.", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -365,7 +336,7 @@ public class MainActivity extends Activity {
     }
 
     private boolean checkForOverlayPermission() {
-        if (!Settings.canDrawOverlays(this)) {
+        if (!android.provider.Settings.canDrawOverlays(this)) {
             Log.d(TAG, "Application is missing overlay permission.");
 
             AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
@@ -373,7 +344,7 @@ public class MainActivity extends Activity {
             builder1.setPositiveButton(
                     "Yes",
                     (dialog, id) -> {
-                        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                                 Uri.parse("package:" + getPackageName()));
                         startActivity(intent);
                     });
@@ -407,7 +378,7 @@ public class MainActivity extends Activity {
         builder1.setPositiveButton(
                 "Yes",
                 (dialog, id) -> {
-                    Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+                    Intent intent = new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS);
                     startActivity(intent);
                 });
 

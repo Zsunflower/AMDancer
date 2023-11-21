@@ -1,6 +1,7 @@
 package com.autogame.amdancer;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.Service;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -8,9 +9,9 @@ import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.net.Uri;
 import android.os.IBinder;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -38,13 +39,22 @@ public class FloatingUIService extends Service implements View.OnClickListener {
         mFloatingView = LayoutInflater.from(this).inflate(R.layout.layout_floating_widget, null);
 
         //setting the layout parameters
-        final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY, // Requires SYSTEM_ALERT_WINDOW permission
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                PixelFormat.TRANSLUCENT
-        );
+        WindowManager.LayoutParams params;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            params = new WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                    PixelFormat.TRANSLUCENT);
+        } else {
+            params = new WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    WindowManager.LayoutParams.TYPE_PHONE,
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                    PixelFormat.TRANSLUCENT);
+        }
         //getting windows services and adding the floating view to it
         mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         mWindowManager.addView(mFloatingView, params);
@@ -60,26 +70,7 @@ public class FloatingUIService extends Service implements View.OnClickListener {
         mFloatingView.findViewById(R.id.startButton_4k).setOnClickListener(this);
         mFloatingView.findViewById(R.id.startButton_BB).setOnClickListener(this);
         mFloatingView.findViewById(R.id.buttonClose).setOnClickListener(this);
-        //adding an touchlistener to make drag movement of the floating widget
-        mFloatingView.findViewById(R.id.relativeLayoutParent).setOnTouchListener(new View.OnTouchListener() {
-            @SuppressLint("ClickableViewAccessibility")
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        return true;
-
-                    case MotionEvent.ACTION_UP:
-                        //when the drag is ended switching the state of the widget
-                        return true;
-
-                    case MotionEvent.ACTION_MOVE:
-                        //this code is helping the widget to move around the screen with fingers
-                        return true;
-                }
-                return false;
-            }
-        });
+        mFloatingView.findViewById(R.id.settings_btn).setOnClickListener(this);
         moveToMiddleTop(params);
     }
 
@@ -133,7 +124,15 @@ public class FloatingUIService extends Service implements View.OnClickListener {
                 mFloatingView.findViewById(R.id.startButton_BB).getBackground().clearColorFilter();
                 ScreenCaptureService.PLAY_MODE = ScreenCaptureService.UNK_MODE;
             }
+        } else if (id == R.id.settings_btn) {
+            start_4k_settings();
         }
+    }
+
+    private void start_4k_settings() {
+        Intent fk_intent = new Intent(this, Settings.class);
+        fk_intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(fk_intent);
     }
 
     private void stopProjection() {

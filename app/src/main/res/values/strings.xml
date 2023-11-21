@@ -8,4 +8,5 @@
     <string name="title_bot">Touch the start button and accept the required permissions.</string>
     <string name="CREDIT_KEY">CREDIT_KEY</string>
     <string name="earn_credit">Earn Credits</string>
+    <string name="save_btn">Save</string>
 </resources>

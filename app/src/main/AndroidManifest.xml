@@ -26,6 +26,12 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".Settings"
+            android:theme="@style/Theme.Transparent"
+            android:screenOrientation="landscape"
+            android:label="fk_settings" />
+
         <service
             android:name=".ScreenCaptureService"
             android:foregroundServiceType="mediaProjection" />
