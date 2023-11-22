@@ -4,71 +4,65 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
-    <RelativeLayout
-        android:id="@+id/relativeLayoutParent"
+
+    <!-- this is the collapsed layout -->
+    <LinearLayout
+        android:id="@+id/layoutCollapsed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:ignore="UselessParent">
+        android:background="#1b1b1b"
+        android:orientation="horizontal"
+        android:visibility="visible">
 
-        <!-- this is the collapsed layout -->
-        <LinearLayout
-            android:id="@+id/layoutCollapsed"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="#1b1b1b"
-            android:orientation="horizontal"
-            android:visibility="visible">
+        <Button
+            android:id="@+id/expanded_btn"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/baseline_arrow_forward_24" />
 
-            <Button
-                android:id="@+id/expanded_btn"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:background="@drawable/baseline_arrow_forward_24" />
+    </LinearLayout>
 
-        </LinearLayout>
+    <!-- this is the expanded layout -->
+    <LinearLayout
+        android:id="@+id/layoutExpanded"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#1b1b1b"
+        android:orientation="horizontal"
+        android:divider="@drawable/divider"
+        android:showDividers="middle"
+        android:visibility="gone"
+        android:weightSum="4">
 
-        <!-- this is the expanded layout -->
-        <LinearLayout
-            android:id="@+id/layoutExpanded"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="#1b1b1b"
-            android:orientation="horizontal"
-            android:divider="@drawable/divider"
-            android:showDividers="middle"
-            android:visibility="gone"
-            android:weightSum="4">
+        <Button
+            android:id="@+id/collapse_btn"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/baseline_arrow_back_24" />
 
-            <Button
-                android:id="@+id/collapse_btn"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:background="@drawable/baseline_arrow_back_24" />
+        <Button
+            android:id="@+id/startButton_4k"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/k4" />
 
-            <Button
-                android:id="@+id/startButton_4k"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:background="@drawable/k4" />
+        <Button
+            android:id="@+id/startButton_BB"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/baseline_bubble_chart_24" />
 
-            <Button
-                android:id="@+id/startButton_BB"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:background="@drawable/baseline_bubble_chart_24" />
+        <Button
+            android:id="@+id/settings_btn"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/settings" />
 
-            <Button
-                android:id="@+id/settings_btn"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:background="@drawable/settings" />
-
-            <Button
-                android:id="@+id/buttonClose"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:background="@drawable/baseline_close_24" />
-        </LinearLayout>
-    </RelativeLayout>
+        <Button
+            android:id="@+id/buttonClose"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/baseline_close_24" />
+    </LinearLayout>
 
 </FrameLayout>

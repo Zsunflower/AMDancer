@@ -95,9 +95,9 @@ public class MainActivity extends Activity {
                     return;
                 }
                 updateCredit(-1);
-                Intent float_ui_intent = new Intent(MainActivity.this, FloatingUIService.class);
-                startService(float_ui_intent);
-                moveTaskToBack(false);
+                Intent float_ui_intent = new Intent(MainActivity.this, FloatingUIActivity.class);
+                startActivity(float_ui_intent);
+                finish();
             }
         });
 
@@ -306,7 +306,7 @@ public class MainActivity extends Activity {
 
     @Override
     public void onDestroy() {
-        Intent float_ui_intent = new Intent(MainActivity.this, FloatingUIService.class);
+        Intent float_ui_intent = new Intent(MainActivity.this, FloatingUIActivity.class);
         stopService(float_ui_intent);
         Log.e(TAG, "Stop FloatingUI Service");
         super.onDestroy();

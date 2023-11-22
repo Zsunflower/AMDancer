@@ -1,39 +1,33 @@
 package com.autogame.amdancer;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
-import android.app.Service;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
-import android.net.Uri;
-import android.os.IBinder;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
-public class FloatingUIService extends Service implements View.OnClickListener {
+
+public class FloatingUIActivity extends Activity implements View.OnClickListener {
     private static final String TAG = "AM Dancer";
     private WindowManager mWindowManager;
     private View mFloatingView;
     private View collapsedView;
     private View expandedView;
 
-    public FloatingUIService() {
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
-
     @SuppressLint("InflateParams")
     @Override
-    public void onCreate() {
-        super.onCreate();
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         //getting the widget layout from xml using layout inflater
         mFloatingView = LayoutInflater.from(this).inflate(R.layout.layout_floating_widget, null);
@@ -55,6 +49,8 @@ public class FloatingUIService extends Service implements View.OnClickListener {
                     WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                     PixelFormat.TRANSLUCENT);
         }
+        params.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+
         //getting windows services and adding the floating view to it
         mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         mWindowManager.addView(mFloatingView, params);
@@ -72,11 +68,6 @@ public class FloatingUIService extends Service implements View.OnClickListener {
         mFloatingView.findViewById(R.id.buttonClose).setOnClickListener(this);
         mFloatingView.findViewById(R.id.settings_btn).setOnClickListener(this);
         moveToMiddleTop(params);
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        return START_NOT_STICKY;
     }
 
     public void moveToMiddleTop(WindowManager.LayoutParams params) {
@@ -103,7 +94,7 @@ public class FloatingUIService extends Service implements View.OnClickListener {
             expandedView.setVisibility(View.VISIBLE);
         } else if (id == R.id.buttonClose) {//closing the widget
             stopProjection();
-            stopSelf();
+            finish();
         } else if (id == R.id.startButton_4k) {
             if (ScreenCaptureService.PLAY_MODE != ScreenCaptureService.FK_MODE) {
                 ScreenCaptureService.PLAY_MODE = ScreenCaptureService.FK_MODE;
@@ -131,11 +122,17 @@ public class FloatingUIService extends Service implements View.OnClickListener {
 
     private void start_4k_settings() {
         Intent fk_intent = new Intent(this, Settings.class);
-        fk_intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        fk_intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(fk_intent);
     }
 
     private void stopProjection() {
         startService(com.autogame.amdancer.ScreenCaptureService.getStopIntent(getApplicationContext()));
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        Log.e("Touch", "xxx");
+        return false;
     }
 }

@@ -29,16 +29,14 @@
         <activity
             android:name=".Settings"
             android:theme="@style/Theme.Transparent"
-            android:screenOrientation="landscape"
-            android:label="fk_settings" />
-
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".FloatingUIActivity"
+            android:theme="@style/Theme.Transparent"
+            android:screenOrientation="landscape" />
         <service
             android:name=".ScreenCaptureService"
             android:foregroundServiceType="mediaProjection" />
-        <service
-            android:name=".FloatingUIService"
-            android:enabled="true"
-            android:exported="false" />
         <service
             android:name=".BotAccessibilityService"
             android:exported="false"
