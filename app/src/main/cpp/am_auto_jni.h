@@ -39,6 +39,12 @@ Java_com_autogame_amdancer_ScreenCaptureService_setupCB(JNIEnv
 														jobject obj
 );
 
+JNIEXPORT void JNICALL
+Java_com_autogame_amdancer_Settings_reload4kConfig(JNIEnv
+														*env,
+														jobject obj
+);
+
 JNIEXPORT jboolean JNICALL
 Java_com_autogame_amdancer_MainActivity_init4kConfig(JNIEnv *env, jobject obj);
 

@@ -77,6 +77,9 @@ bool K4Config::parse_config(const string &config_path)
 			} else if (key == "height")
 			{
 				HEIGHT = std::stoi(value);
+			} else if (key == "delta_per_box")
+			{
+				delta_per_box = std::stoi(value);
 			}
 		}
 	}
@@ -87,6 +90,7 @@ bool K4Config::parse_config(const string &config_path)
 void K4Config::print_config() const
 {
 	LOGD("WIDTH x HEIGHT: (%d x %d)", WIDTH, HEIGHT);
+	LOGD("delta_per_box: %d", delta_per_box);
 	LOGD("left_key: (%d, %d, %d, %d)", left_key.x, left_key.y, left_key.width, left_key.height);
 	LOGD("right_key: (%d, %d, %d, %d)", right_key.x, right_key.y, right_key.width,
 		 right_key.height);

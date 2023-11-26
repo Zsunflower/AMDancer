@@ -1,19 +1,22 @@
 package com.autogame.amdancer;
 
 import android.annotation.SuppressLint;
+import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.os.Bundle;
-import android.util.DisplayMetrics;
-import android.util.Log;
+import android.graphics.PixelFormat;
+import android.os.IBinder;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.Nullable;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -21,36 +24,97 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.HashMap;
+import java.util.Map;
 
-public class Settings extends AppCompatActivity {
+public class Settings extends Service {
+    private static final Map<String, Integer> key2color = new HashMap<>();
 
+    static {
+        key2color.put("left_key", Color.GREEN);
+        key2color.put("right_key", Color.BLUE);
+        key2color.put("up_key", Color.YELLOW);
+        key2color.put("down_key", Color.rgb(255, 128, 0));
+        key2color.put("arrows_key", Color.WHITE);
+        key2color.put("space_key", Color.CYAN);
+        key2color.put("pointer_box", Color.RED);
+        key2color.put("per_box", Color.MAGENTA);
+    }
+
+    private View mFloatingView;
     private String configPath;
     private FrameLayout container;
+    private WindowManager mWindowManager;
+    private int width, height;
+    private int delta_per_box;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.settings);
+    public void onCreate() {
+        super.onCreate();
+        mFloatingView = LayoutInflater.from(this).inflate(R.layout.settings, null);
+
+        //setting the layout parameters
+        WindowManager.LayoutParams params;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            params = new WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                    PixelFormat.TRANSLUCENT);
+        } else {
+            params = new WindowManager.LayoutParams(
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.MATCH_PARENT,
+                    WindowManager.LayoutParams.TYPE_PHONE,
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                    PixelFormat.TRANSLUCENT);
+        }
+
+        //getting windows services and adding the floating view to it
+        mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+        mWindowManager.addView(mFloatingView, params);
+
         // Get the container layout
-        container = findViewById(R.id.container);
+        container = mFloatingView.findViewById(R.id.container);
 
         File externalFilesDir = getExternalFilesDir(null);
         if (externalFilesDir != null) {
             configPath = externalFilesDir.getAbsolutePath() + "/configs/";
         }
-        Button save_btn = findViewById(R.id.save_btn);
+        Button save_btn = mFloatingView.findViewById(R.id.save_btn);
         save_btn.setOnClickListener(view -> {
             save_settings();
+            int temp = ScreenCaptureService.PLAY_MODE;
+            ScreenCaptureService.PLAY_MODE = ScreenCaptureService.UNK_MODE;
+            reload4kConfig();
+            ScreenCaptureService.PLAY_MODE = temp;
+            stopSelf();
         });
         create_settings();
     }
 
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        width = intent.getIntExtra("width", 0);
+        height = intent.getIntExtra("height", 0);
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mFloatingView != null) mWindowManager.removeView(mFloatingView);
+    }
+
     private void save_settings() {
         File configFile = new File(configPath, "4k_config.ini");
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int height = displayMetrics.heightPixels;
-        int width = displayMetrics.widthPixels;
         try {
             FileOutputStream fos = new FileOutputStream(configFile);
             OutputStreamWriter osw = new OutputStreamWriter(fos);
@@ -64,6 +128,7 @@ public class Settings extends AppCompatActivity {
                     osw.write(line);
                 }
             }
+            osw.write(String.format("%s=%s\n", "delta_per_box", delta_per_box));
 
             osw.flush();
             osw.close();
@@ -71,8 +136,9 @@ public class Settings extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        finish();
     }
+
+    public native void reload4kConfig();
 
     private boolean parse_rect(String value, Rect r) {
         String[] keyValuePairs = value.split(",");
@@ -97,21 +163,23 @@ public class Settings extends AppCompatActivity {
                 BufferedReader bufferedReader = new BufferedReader(fileReader);
                 String line;
                 while ((line = bufferedReader.readLine()) != null) {
-                    Log.d("File Content", line);
                     String[] keyValuePairs = line.split("=");
                     if (keyValuePairs.length == 2) {
                         String key = keyValuePairs[0].trim();
                         String value = keyValuePairs[1].trim();
+                        if (key.equals("delta_per_box")) {
+                            delta_per_box = Integer.parseInt(value);
+                            continue;
+                        }
                         Rect r = new Rect();
                         if (parse_rect(value, r)) {
-                            RectangleView bbox = new RectangleView(this, r.left, r.top, r.right, r.bottom, Color.RED, key);
+                            RectangleView bbox = new RectangleView(this, r.left, r.top, r.right, r.bottom, key2color.get(key), key);
                             container.addView(bbox);
                         }
                     }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                Log.e("Read File", "Error reading file: " + e.getMessage());
             }
         }
     }

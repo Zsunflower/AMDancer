@@ -1,33 +1,32 @@
 package com.autogame.amdancer;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
+import android.app.Service;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
-import android.os.Bundle;
-import android.util.Log;
+import android.os.IBinder;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
+import androidx.annotation.Nullable;
 
-public class FloatingUIActivity extends Activity implements View.OnClickListener {
+
+public class FloatingUIService extends Service implements View.OnClickListener {
     private static final String TAG = "AM Dancer";
     private WindowManager mWindowManager;
     private View mFloatingView;
     private View collapsedView;
     private View expandedView;
+    private int width, height;
 
-    @SuppressLint("InflateParams")
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onCreate() {
+        super.onCreate();
 
         //getting the widget layout from xml using layout inflater
         mFloatingView = LayoutInflater.from(this).inflate(R.layout.layout_floating_widget, null);
@@ -83,6 +82,19 @@ public class FloatingUIActivity extends Activity implements View.OnClickListener
         if (mFloatingView != null) mWindowManager.removeView(mFloatingView);
     }
 
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        width = intent.getIntExtra("width", 0);
+        height = intent.getIntExtra("height", 0);
+        return super.onStartCommand(intent, flags, startId);
+    }
+
     @Override
     public void onClick(View v) {
         int id = v.getId();
@@ -93,8 +105,8 @@ public class FloatingUIActivity extends Activity implements View.OnClickListener
             collapsedView.setVisibility(View.GONE);
             expandedView.setVisibility(View.VISIBLE);
         } else if (id == R.id.buttonClose) {//closing the widget
-            stopProjection();
-            finish();
+            ScreenCaptureService.PLAY_MODE = ScreenCaptureService.UNK_MODE;
+            stopSelf();
         } else if (id == R.id.startButton_4k) {
             if (ScreenCaptureService.PLAY_MODE != ScreenCaptureService.FK_MODE) {
                 ScreenCaptureService.PLAY_MODE = ScreenCaptureService.FK_MODE;
@@ -121,18 +133,13 @@ public class FloatingUIActivity extends Activity implements View.OnClickListener
     }
 
     private void start_4k_settings() {
-        Intent fk_intent = new Intent(this, Settings.class);
-        fk_intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(fk_intent);
+        Intent float_ui_intent = new Intent(getApplicationContext(), Settings.class);
+        float_ui_intent.putExtra("width", width);
+        float_ui_intent.putExtra("height", height);
+        startService(float_ui_intent);
     }
 
     private void stopProjection() {
         startService(com.autogame.amdancer.ScreenCaptureService.getStopIntent(getApplicationContext()));
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        Log.e("Touch", "xxx");
-        return false;
     }
 }

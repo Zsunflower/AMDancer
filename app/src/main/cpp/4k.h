@@ -33,6 +33,7 @@ class K4Config
 {
 public:
 	int WIDTH{}, HEIGHT{};
+	int delta_per_box{};
 	Rect left_key, right_key, up_key, down_key;
 	Rect space_key, arrows_key, pointer_box, per_box;
 	bool is_init = false;

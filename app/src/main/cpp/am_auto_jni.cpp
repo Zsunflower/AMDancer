@@ -14,7 +14,7 @@ Java_com_autogame_amdancer_MainActivity_setConfigPath(JNIEnv *env, jobject thiz,
 	config_path = _config_path;
 	env->ReleaseStringUTFChars(jconfig_path, _config_path);
 	buble_config_path = config_path + "/" + "buble_config.ini";
-	k4_config_path = config_path + "/" + "buble_config_4k.ini";
+	k4_config_path = config_path + "/" + "4k_config.ini";
 	LOGD("Config dir: %s", config_path.c_str());
 	LOGD("Buble config path: %s", buble_config_path.c_str());
 	LOGD("4K config path: %s", k4_config_path.c_str());
@@ -326,7 +326,7 @@ Java_com_autogame_amdancer_ScreenCaptureService_process4k(
 				)
 		{
 			Rect r = bboxes[0];
-			if (r.x + r.width / 2 >=
+			if (r.x + r.width / 2 + k4_config.delta_per_box >=
 				k4_config.per_box.x - k4_config.pointer_box.x + k4_config.per_box.width / 2)
 			{
 				env->
@@ -347,5 +347,20 @@ Java_com_autogame_amdancer_ScreenCaptureService_process4k(
 		last_x = 0;
 		std::this_thread::sleep_for(std::chrono::milliseconds(50)
 		);
+	}
+}
+
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_autogame_amdancer_Settings_reload4kConfig(JNIEnv *env, jobject obj)
+{
+	k4_config.is_init = k4_config.parse_config(k4_config_path);
+	if (k4_config.is_init)
+	{
+		LOGD("Reload 4K config success!");
+		k4_config.print_config();
+	} else
+	{
+		LOGD("Reload 4K config failed!");
 	}
 }

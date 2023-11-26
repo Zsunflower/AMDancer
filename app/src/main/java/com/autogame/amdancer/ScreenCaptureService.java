@@ -87,25 +87,6 @@ public class ScreenCaptureService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
-        // create store dir
-        File externalFilesDir = getExternalFilesDir(null);
-        if (externalFilesDir != null) {
-            String mStoreDir = externalFilesDir.getAbsolutePath() + "/screenshots/";
-            Log.e(TAG, "Save screenshots to: " + mStoreDir);
-            File storeDirectory = new File(mStoreDir);
-            if (!storeDirectory.exists()) {
-                boolean success = storeDirectory.mkdirs();
-                if (!success) {
-                    Log.e(TAG, "failed to create file storage directory.");
-                    stopSelf();
-                }
-            }
-        } else {
-            Log.e(TAG, "failed to create file storage directory, getExternalFilesDir is null.");
-            stopSelf();
-        }
-
         // start capture handling thread
         new Thread() {
             @Override
@@ -115,7 +96,6 @@ public class ScreenCaptureService extends Service {
                 Looper.loop();
             }
         }.start();
-        Log.e(TAG, "ScreenCaptureService onCreate .");
         auto_accessibility_service = BotAccessibilityService.getInstance();
         setupCB();
     }
@@ -183,7 +163,6 @@ public class ScreenCaptureService extends Service {
         // get width and height
         mWidth = Resources.getSystem().getDisplayMetrics().widthPixels;
         mHeight = Resources.getSystem().getDisplayMetrics().heightPixels;
-        Log.e(TAG, "Screen Size: " + mWidth + " x " + mHeight);
         // start capture reader
         mImageReader = ImageReader.newInstance(mWidth, mHeight, PixelFormat.RGBA_8888, 2);
         mVirtualDisplay = mMediaProjection.createVirtualDisplay(SCREENCAP_NAME, mWidth, mHeight,
@@ -226,7 +205,6 @@ public class ScreenCaptureService extends Service {
                         process4k(mWidth + rowPadding / pixelStride, mHeight, buffer);
                     } else {
                         Thread.sleep(1000);
-                        Log.e(TAG, "Sleep UNK");
                     }
                 }
             } catch (Exception e) {

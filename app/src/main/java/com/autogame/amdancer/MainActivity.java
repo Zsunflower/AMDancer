@@ -11,6 +11,7 @@ import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
@@ -95,9 +96,15 @@ public class MainActivity extends Activity {
                     return;
                 }
                 updateCredit(-1);
-                Intent float_ui_intent = new Intent(MainActivity.this, FloatingUIActivity.class);
-                startActivity(float_ui_intent);
-                finish();
+                DisplayMetrics displayMetrics = new DisplayMetrics();
+                getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                int height = displayMetrics.heightPixels;
+                int width = displayMetrics.widthPixels;
+                Intent float_ui_intent = new Intent(MainActivity.this, FloatingUIService.class);
+                float_ui_intent.putExtra("width", width);
+                float_ui_intent.putExtra("height", height);
+                startService(float_ui_intent);
+                moveTaskToBack(false);
             }
         });
 
@@ -135,20 +142,17 @@ public class MainActivity extends Activity {
             @Override
             public void onAdClicked() {
                 // Code to be executed when the user clicks on an ad.
-                Log.e(TAG, "onAdClicked");
             }
 
             @Override
             public void onAdClosed() {
                 // Code to be executed when the user is about to return
                 // to the app after tapping on an ad.
-                Log.e(TAG, "onAdClosed");
             }
 
             @Override
             public void onAdFailedToLoad(@NonNull LoadAdError adError) {
                 // Code to be executed when an ad request fails.
-                Log.e(TAG, "onAdFailedToLoad");
                 Log.e(TAG, adError.getMessage());
             }
 
@@ -156,20 +160,17 @@ public class MainActivity extends Activity {
             public void onAdImpression() {
                 // Code to be executed when an impression is recorded
                 // for an ad.
-                Log.e(TAG, "onAdImpression");
             }
 
             @Override
             public void onAdLoaded() {
                 // Code to be executed when an ad finishes loading.
-                Log.e(TAG, "onAdLoaded");
             }
 
             @Override
             public void onAdOpened() {
                 // Code to be executed when an ad opens an overlay that
                 // covers the screen.
-                Log.e(TAG, "onAdOpened");
             }
         });
         AdRequest adRequest = new AdRequest.Builder().build();
@@ -219,7 +220,6 @@ public class MainActivity extends Activity {
                             // Handle the error.
                             rewardedAd = null;
                             MainActivity.this.isLoading = false;
-                            Log.e(TAG, "onAdFailedToLoad");
                             Log.d(TAG, loadAdError.getMessage());
                         }
 
@@ -227,7 +227,6 @@ public class MainActivity extends Activity {
                         public void onAdLoaded(@NonNull RewardedAd rewardedAd) {
                             MainActivity.this.rewardedAd = rewardedAd;
                             MainActivity.this.isLoading = false;
-                            Log.d(TAG, "onAdLoaded");
                         }
                     });
         }
@@ -253,13 +252,11 @@ public class MainActivity extends Activity {
                     @Override
                     public void onAdShowedFullScreenContent() {
                         // Called when ad is shown.
-                        Log.e(TAG, "onAdShowedFullScreenContent");
                     }
 
                     @Override
                     public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
                         // Called when ad fails to show.
-                        Log.d(TAG, "onAdFailedToShowFullScreenContent");
                         // Don't forget to set the ad reference to null so you
                         // don't show the ad a second time.
                         rewardedAd = null;
@@ -271,7 +268,6 @@ public class MainActivity extends Activity {
                         // Don't forget to set the ad reference to null so you
                         // don't show the ad a second time.
                         rewardedAd = null;
-                        Log.d(TAG, "onAdDismissedFullScreenContent");
                         // Preload the next rewarded ad.
                         MainActivity.this.loadRewardedAd();
                     }
@@ -283,7 +279,6 @@ public class MainActivity extends Activity {
                     @Override
                     public void onUserEarnedReward(@NonNull RewardItem rewardItem) {
                         // Handle the reward.
-                        Log.d(TAG, "The user earned the reward.");
                         addCredit();
                     }
                 });
@@ -306,9 +301,8 @@ public class MainActivity extends Activity {
 
     @Override
     public void onDestroy() {
-        Intent float_ui_intent = new Intent(MainActivity.this, FloatingUIActivity.class);
+        Intent float_ui_intent = new Intent(MainActivity.this, FloatingUIService.class);
         stopService(float_ui_intent);
-        Log.e(TAG, "Stop FloatingUI Service");
         super.onDestroy();
     }
 
@@ -357,7 +351,6 @@ public class MainActivity extends Activity {
             alert11.show();
             return false;
         }
-        Log.d(TAG, "Application has permission to draw overlay.");
         return true;
     }
 

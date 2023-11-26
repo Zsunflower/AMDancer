@@ -26,14 +26,14 @@
             </intent-filter>
         </activity>
 
-        <activity
+        <service
             android:name=".Settings"
-            android:theme="@style/Theme.Transparent"
-            android:screenOrientation="landscape" />
-        <activity
-            android:name=".FloatingUIActivity"
-            android:theme="@style/Theme.Transparent"
-            android:screenOrientation="landscape" />
+            android:exported="false"
+            android:theme="@style/Theme.Transparent" />
+        <service
+            android:name=".FloatingUIService"
+            android:exported="false"
+            android:theme="@style/Theme.Transparent" />
         <service
             android:name=".ScreenCaptureService"
             android:foregroundServiceType="mediaProjection" />
