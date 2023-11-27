@@ -326,8 +326,8 @@ Java_com_autogame_amdancer_ScreenCaptureService_process4k(
 				)
 		{
 			Rect r = bboxes[0];
-			if (r.x + r.width / 2 + k4_config.delta_per_box >=
-				k4_config.per_box.x - k4_config.pointer_box.x + k4_config.per_box.width / 2)
+			if (r.x + r.width / 2 >=
+				k4_config.per_box.x - k4_config.pointer_box.x)
 			{
 				env->
 						CallVoidMethod(obj, click_id,

@@ -246,6 +246,9 @@ public class Settings extends Service {
             canvas.drawRect(left, top, right, bottom, paint);
             canvas.drawOval(left - ANCHOR_SIZE, top - ANCHOR_SIZE, left + ANCHOR_SIZE, top + ANCHOR_SIZE, anchor_paint);
             canvas.drawOval(right - ANCHOR_SIZE, bottom - ANCHOR_SIZE, right + ANCHOR_SIZE, bottom + ANCHOR_SIZE, anchor_paint);
+            if(name.equals("per_box")) {
+                canvas.drawLine((left + right) / 2, top, (left + right) / 2, bottom, anchor_paint);
+            }
         }
 
         @SuppressLint("ClickableViewAccessibility")
